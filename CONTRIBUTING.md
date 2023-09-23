@@ -4,7 +4,6 @@
 * Use 4 spaces for indentation, no tabs.
 * Place spaces around operators, e.g., x = y + z;.
 * Use a space after commas in function arguments, e.g., func(x, y, z);.
-
 ## 2. Naming Conventions:
 * Variables and functions: snake_case.
 * Constants and macros: UPPER_SNAKE_CASE.
