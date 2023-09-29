@@ -1,6 +1,6 @@
 #ifndef LEXER_H 
 #define LEXER_H 
-typedef enum{
+typedef enum{           //lex type
     ID_function,        //bar
     ID_variable,        //following var/let
     type,               //String/String?
@@ -33,7 +33,8 @@ typedef enum{
     funif,              //if
     funwhile,           //while
     eof,       
-} token_type;             //lex type
+} TokenType; 
+            
 typedef enum{       //machine states
     start,
     IDfunkcie,
@@ -53,17 +54,17 @@ typedef enum{       //machine states
     lt0,
     mt0,
     meq,
-} state;
+} State;
 
 typedef struct token {
-  token_type type;
+  TokenType type;
   char* value;
-} token_t;
+} Token;
 
 
-/*
-token_t get_token();
-token_t make_token(token_type typ, char* hodnota);
-*/
+
+Token get_token();
+Token make_token(TokenType typ, char* hodnota);
+
 
 #endif // LEXER_H 
