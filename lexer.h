@@ -1,8 +1,7 @@
 #ifndef LEXER_H 
 #define LEXER_H 
 typedef enum{           //lex type
-    ID_function,        //bar
-    ID_variable,        //following var/let
+    identifiertoken,
     type,               //String/String?
     lbracket,           //(
     rbracket,           //)
@@ -22,9 +21,9 @@ typedef enum{           //lex type
     nidentity,          //!=
     comma,              //,
     integer,            //56
-    string,             //"abc"
+    stringtoken,             //"abc"
     multilinestring,    //"""foobar"""
-    ddouble,            //13.56/E/e
+    doubletoken,            //13.56/E/e
     nil,                //nil
     colon,              //:
     funreturn,          //return
@@ -32,15 +31,16 @@ typedef enum{           //lex type
     function,           //func
     funif,              //if
     funwhile,           //while
+    varkw,              //var keyword
+    letkw,              //let keyword
     eof,       
 } TokenType; 
             
 typedef enum{       //machine states
     start,
-    IDfunkcie,
-    varlet,
-    varname,
+    identifier,
     string,
+    stringvalid,
     stringmultiline,
     dtype,
     Int,
@@ -48,7 +48,6 @@ typedef enum{       //machine states
     identity1,
     identity2,
     nidentity1,
-    nidentity2,
     Error,
     leq,
     lt0,
