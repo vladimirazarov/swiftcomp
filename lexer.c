@@ -89,7 +89,7 @@ Token get_token(){
         } else if (a == '+'){
             return make_token(plus, "+");
         } else if (a == '-'){
-            return make_token(minus, "-");
+            State = mins;
         } else if (a == '*'){
             return make_token(mul, "*");
         }else if (a == '/'){
@@ -442,6 +442,16 @@ Token get_token(){
                     return make_token(mt, ">");
                 } else {
                     return make_token(mte, ">=");
+                }
+                break;
+
+                case mins:
+                a = getchar();
+                if (a != '>') {
+                    ungetc(a, stdin);
+                    return make_token(minus, "-");
+                } else {
+                    return make_token(arrow, "->");
                 }
                 break;
             }
