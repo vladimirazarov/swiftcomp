@@ -73,4 +73,5 @@ P = {
 53. <type> → Double
 54. <type> → String
 
+55. <expression> → PREC_ANALYSIS
     }
