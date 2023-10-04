@@ -60,7 +60,7 @@ typedef struct {
     // Name of the identifier
     char *name;          
     // Type and value 
-    token_t *data; 
+    Token *data; 
     // Must be set to true if variable was defined
     bool is_defined;
     // Scope of the identifier (global, local, or within a function)
@@ -86,6 +86,6 @@ SymbolTable* initSymbolTable();
 void insertSymbol(SymbolTable* table, Symbol symbol);
 Symbol* findSymbol(SymbolTable* table, char* name);
 void deleteSymbol(SymbolTable* table, char* name);
-Symbol createSymbol(char *name, token_t *data, Scope scope, Modifier modifier, FunctionInfo *functionInfo);
+Symbol createSymbol(char *name, Token *data, Scope scope, Modifier modifier, FunctionInfo *functionInfo);
 void freeSymbolTable(SymbolTable* table);
 #endif // SYMBOL_TABLE_H 

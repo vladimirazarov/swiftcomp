@@ -7,8 +7,8 @@
 int main() {
     SymbolTable* table = initSymbolTable();
 
-    token_t varToken;
-    varToken.type = ID_variable;
+    Token varToken;
+    varToken.type = identifier;
     varToken.value = strdup("int");
 
     Symbol varA;
@@ -21,8 +21,8 @@ int main() {
 
     insertSymbol(table, varA);
 
-    token_t funcToken;
-    funcToken.type = ID_function;
+    Token funcToken;
+    funcToken.type = identifier;
     funcToken.value = strdup("void");
 
     Symbol funcB;

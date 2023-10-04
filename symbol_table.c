@@ -15,7 +15,7 @@
 #include "stdlib.h"
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-Symbol createSymbol(char *name, token_t *data, Scope scope, Modifier modifier, FunctionInfo *functionInfo) {
+Symbol createSymbol(char *name, Token *data, Scope scope, Modifier modifier, FunctionInfo *functionInfo) {
     Symbol sym;
     sym.name = name;
     sym.data = data;  
