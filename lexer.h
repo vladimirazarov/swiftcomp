@@ -33,6 +33,7 @@ typedef enum{           //lex type
     funwhile,           //while
     varkw,              //var keyword
     letkw,              //let keyword
+    arrow,
     eof,       
 } TokenType; 
             
@@ -53,6 +54,7 @@ typedef enum{       //machine states
     lt0,
     mt0,
     meq,
+    mins,
 } State;
 
 typedef struct token {
