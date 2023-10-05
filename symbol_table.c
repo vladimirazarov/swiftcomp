@@ -15,7 +15,7 @@
 #include "stdlib.h"
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-Symbol createSymbol(char *name, Token *data, Scope scope, Modifier modifier, FunctionInfo *functionInfo) {
+Symbol create_symbol(char *name, Token *data, Scope scope, Modifier modifier, FunctionInfo *functionInfo) {
     Symbol sym;
     sym.name = name;
     sym.data = data;  
@@ -26,7 +26,7 @@ Symbol createSymbol(char *name, Token *data, Scope scope, Modifier modifier, Fun
     return sym;
 }
 
-SymbolTable* initSymbolTable() {
+SymbolTable* init_symbol_table(){
     SymbolTable* table = (SymbolTable*)malloc(sizeof(SymbolTable));
     if (!table) {
         return NULL;
@@ -42,14 +42,14 @@ int height(AVLNode* node) {
     return node->height;
 }
 
-int getBalance(AVLNode* node) {
+int get_balance(AVLNode* node){
     if (node == NULL) {
         return 0;
     }
     return height(node->left) - height(node->right);
 }
 
-AVLNode* minValueNode(AVLNode* root) {
+AVLNode* min_value_node(AVLNode* root) {
     AVLNode* current = root;
 
     while (current->left != NULL) {
@@ -59,7 +59,7 @@ AVLNode* minValueNode(AVLNode* root) {
     return current;
 }
 
-AVLNode* rightRotate(AVLNode* y) {
+AVLNode* right_rotate(AVLNode* y) {
     AVLNode* x = y->left;
     AVLNode* T3 = x->right;
 
@@ -72,7 +72,7 @@ AVLNode* rightRotate(AVLNode* y) {
     return x;
 }
 
-AVLNode* leftRotate(AVLNode* x) {
+AVLNode* left_rotate(AVLNode* x) {
     AVLNode* y = x->right;
     AVLNode* T2 = y->left;
 
@@ -85,7 +85,7 @@ AVLNode* leftRotate(AVLNode* x) {
     return y;
 }
 
-AVLNode* insertNode(AVLNode* node, char* name, Symbol symbol) {
+AVLNode* insert_node(AVLNode* node, char* name, Symbol symbol) {
     if (node == NULL) {
         AVLNode* newNode = (AVLNode*)malloc(sizeof(AVLNode));
         newNode->symbol = symbol;
@@ -141,7 +141,7 @@ Symbol* search(AVLNode* root, char* name) {
     return NULL;
 }
 
-AVLNode* deleteNode(AVLNode* root, char* name) {
+AVLNode* delete_node(AVLNode* root, char* name) {
     if (root == NULL) {
         return root;
     }
@@ -199,22 +199,22 @@ AVLNode* deleteNode(AVLNode* root, char* name) {
     return root;
 }
 
-void insertSymbol(SymbolTable* table, Symbol symbol) {
+void insert_symbol(SymbolTable* table, Symbol symbol) {
     if (!table) return;
     table->root = insertNode(table->root, symbol.name, symbol);
 }
 
-Symbol* findSymbol(SymbolTable* table, char* name) {
+Symbol* find_symbol(SymbolTable* table, char* name) {
     if (!table) return NULL;
     return search(table->root, name);
 }
 
-void deleteSymbol(SymbolTable* table, char* name) {
+void delete_symbol(SymbolTable* table, char* name) {
     if (!table) return;
     table->root = deleteNode(table->root, name);
 }
 
-void updateSymbolValue(SymbolTable *table, char *name, void *newValue) {
+void update_symbol_value(SymbolTable *table, char *name, void *newValue) {
     AVLNode *node = search(table->root, name);
     
     if (node) {
@@ -224,7 +224,7 @@ void updateSymbolValue(SymbolTable *table, char *name, void *newValue) {
     }
 }
 
-void freeNode(AVLNode* node) {
+void free_node(AVLNode* node) {
     if (node == NULL) {
         return;
     }
@@ -235,7 +235,7 @@ void freeNode(AVLNode* node) {
     free(node);
 }
 
-void freeSymbolTable(SymbolTable* table) {
+void free_symbol_table(SymbolTable* table) {
     if (table == NULL) {
         return;
     }
