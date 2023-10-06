@@ -109,19 +109,19 @@ Token get_token()
             }
             else if (a == '(')
             {
-                return make_token(lbracket, "(");
+                return make_token(LEFT_PARENTHESIS, "(");
             }
             else if (a == ':')
             {
-                return make_token(colon, ":");
+                return make_token(COLON, ":");
             }
             else if (a == ')')
             {
-                return make_token(rbracket, ")");
+                return make_token(RIGHT_PARENTHESIS, ")");
             }
             else if (a == '+')
             {
-                return make_token(plus, "+");
+                return make_token(PLUS_OPERATOR, "+");
             }
             else if (a == '-')
             {
@@ -129,27 +129,27 @@ Token get_token()
             }
             else if (a == '*')
             {
-                return make_token(mul, "*");
+                return make_token(MULTIPLICATION_OPERATOR, "*");
             }
             else if (a == '/')
             {
-                return make_token(division, "/");
+                return make_token(DIVISION_OPERATOR, "/");
             }
             else if (a == '{')
             {
-                return make_token(lsetbracket, "{");
+                return make_token(LEFT_CURLY_BRACE, "{");
             }
             else if (a == '}')
             {
-                return make_token(rsetbracket, "}");
+                return make_token(RIGHT_CURLY_BRACE, "}");
             }
             else if (a == ';')
             {
-                return make_token(semicolon, ";");
+                return make_token(SEMICOLON, ";");
             }
             else if (a == ',')
             {
-                return make_token(comma, ",");
+                return make_token(COMMA, ",");
             }
             else if (a == '<')
             {
@@ -169,8 +169,9 @@ Token get_token()
             }
             else if (a == EOF)
             {
-                return make_token(eof, NULL);
+                return make_token(END_OF_FILE, NULL);
             }
+
             else
             {
                 State = Error;
@@ -201,45 +202,52 @@ Token get_token()
             }
 
             // KEYWORD TESTS
-            if (strcmp(str, "String") == 0 || strcmp(str, "Int") == 0 || strcmp(str, "Double") == 0 ||
-                strcmp(str, "Double?") == 0 || strcmp(str, "Int?") == 0 || strcmp(str, "String?") == 0)
+            if (strcmp(str, "String") == 0 || strcmp(str, "String?") == 0)
             {
-                return make_token(type, str);
+                return make_token(STRING_KEYWORD, str);
+            }
+            else if (strcmp(str, "Int") == 0 || strcmp(str, "Int?") == 0)
+            {
+                return make_token(INT_KEYWORD, str);
+            }
+            else if (strcmp(str, "Double") == 0 || strcmp(str, "Double?") == 0)
+            {
+                return make_token(DOUBLE_KEYWORD, str);
             }
             if (strcmp(str, "var") == 0)
             {
-                return make_token(varkw, str);
+                return make_token(VAR_KEYWORD, str);
             }
             if (strcmp(str, "let") == 0)
             {
-                return make_token(letkw, str);
+                return make_token(LET_KEYWORD, str);
             }
             if (strcmp(str, "return") == 0)
             {
-                return make_token(funreturn, str);
+                return make_token(RETURN_KEYWORD, str);
             }
             if (strcmp(str, "else") == 0)
             {
-                return make_token(funelse, str);
+                return make_token(ELSE_KEYWORD, str);
             }
             if (strcmp(str, "func") == 0)
             {
-                return make_token(function, str);
+                return make_token(FUNCTION_KEYWORD, str);
             }
             if (strcmp(str, "if") == 0)
             {
-                return make_token(funif, str);
+                return make_token(IF_KEYWORD, str);
             }
             if (strcmp(str, "nil") == 0)
             {
-                return make_token(nil, str);
+                return make_token(NIL_LITERAL, str);
             }
             if (strcmp(str, "while") == 0)
             {
-                return make_token(funwhile, str);
+                return make_token(WHILE_KEYWORD, str);
             }
 
-            return make_token(identifiertoken, str);
+            return make_token(IDENTIFIER, str);
             break;
 
         case Int:
@@ -274,7 +282,7 @@ Token get_token()
             {
                 break;
             }
-            return make_token(integer, str);
+            return make_token(INTEGER_LITERAL, str);
             break;
 
         case ddouble: // work pls
@@ -365,12 +373,12 @@ Token get_token()
                         i++;
                     }
                     ungetc(a, stdin);
-                    return make_token(doubletoken, str);
+                    return make_token(DOUBLE_LITERAL, str);
                 }
                 else
                 {
                     ungetc(a, stdin);
-                    return make_token(doubletoken, str);
+                    return make_token(DOUBLE_LITERAL, str);
                 }
             }
             else
@@ -425,7 +433,7 @@ Token get_token()
                     i++;
                 }
                 ungetc(a, stdin);
-                return make_token(doubletoken, str);
+                return make_token(DOUBLE_LITERAL, str);
             }
             break;
 
@@ -445,7 +453,7 @@ Token get_token()
                 }
                 else
                 {
-                    return make_token(stringtoken, NULL);
+                    return make_token(STRING_LITERAL, NULL);
                     break;
                 }
             }
@@ -515,10 +523,10 @@ Token get_token()
             break;
 
         case stringvalid:
-            return make_token(stringtoken, str);
+            return make_token(STRING_LITERAL, str);
             break;
 
-        case multilinestring:
+        case MULTILINE_STRING:
             // TBD
             break;
 
@@ -527,11 +535,11 @@ Token get_token()
             if (a != '=')
             {
                 ungetc(a, stdin);
-                return make_token(assign, "=");
+                return make_token(ASSIGNMENT_OPERATOR, "=");
             }
             else
             {
-                return make_token(identity, "==");
+                return make_token(EQUALITY_OPERATOR, "==");
             }
             break;
 
@@ -544,7 +552,7 @@ Token get_token()
             }
             else
             {
-                return make_token(nidentity, "!=");
+                return make_token(NOT_EQUAL_OPERATOR, "!=");
             }
             break;
 
@@ -558,11 +566,11 @@ Token get_token()
             if (a != '=')
             {
                 ungetc(a, stdin);
-                return make_token(lt, "<");
+                return make_token(LESS_THAN_OPERATOR, "<");
             }
             else
             {
-                return make_token(lte, "<=");
+                return make_token(LESS_THAN_EQUAL_OPERATOR, "<=");
             }
             break;
 
@@ -571,11 +579,11 @@ Token get_token()
             if (a != '=')
             {
                 ungetc(a, stdin);
-                return make_token(mt, ">");
+                return make_token(GREATER_THAN_OPERATOR, ">");
             }
             else
             {
-                return make_token(mte, ">=");
+                return make_token(GREATER_THAN_EQUAL_OPERATOR, ">=");
             }
             break;
 
@@ -584,11 +592,11 @@ Token get_token()
             if (a != '>')
             {
                 ungetc(a, stdin);
-                return make_token(minus, "-");
+                return make_token(MINUS_OPERATOR, "-");
             }
             else
             {
-                return make_token(arrow, "->");
+                return make_token(ARROW, "->");
             }
             break;
         }

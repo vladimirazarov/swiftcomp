@@ -1,42 +1,44 @@
 #ifndef LEXER_H 
-#define LEXER_H 
-typedef enum{           //lex type
-    identifiertoken,
-    type,               //String/String?
-    lbracket,           //(
-    rbracket,           //)
-    lsetbracket,        //{
-    rsetbracket,        //}
-    plus,               //+
-    minus,              //-
-    mul,                //*
-    division,           ///
-    lt,                 //<
-    mt,                 //>
-    lte,                //<=
-    mte,                //>=
-    semicolon,          //;
-    assign,             //=
-    identity,           //==
-    nidentity,          //!=
-    comma,              //,
-    integer,            //56
-    stringtoken,             //"abc"
-    multilinestring,    //"""foobar"""
-    doubletoken,            //13.56/E/e
-    nil,                //nil
-    colon,              //:
-    funreturn,          //return
-    funelse,            //else
-    function,           //func
-    funif,              //if
-    funwhile,           //while
-    varkw,              //var keyword
-    letkw,              //let keyword
-    arrow,
-    eof,       
-} TokenType; 
-            
+
+typedef enum{
+    IDENTIFIER,
+    LEFT_PARENTHESIS,        // (
+    RIGHT_PARENTHESIS,       // )
+    LEFT_CURLY_BRACE,        // {
+    RIGHT_CURLY_BRACE,       // }
+    PLUS_OPERATOR,           // +
+    MINUS_OPERATOR,          // -
+    MULTIPLICATION_OPERATOR, // *
+    DIVISION_OPERATOR,       // /
+    LESS_THAN_OPERATOR,      // <
+    GREATER_THAN_OPERATOR,   // >
+    LESS_THAN_EQUAL_OPERATOR,         // <=
+    GREATER_THAN_EQUAL_OPERATOR,      // >=
+    SEMICOLON,               // ;
+    ASSIGNMENT_OPERATOR,     // =
+    EQUALITY_OPERATOR,       // ==
+    NOT_EQUAL_OPERATOR,      // !=
+    COMMA,                   // ,
+    INTEGER_LITERAL,         // 56
+    STRING_LITERAL,          // "abc"
+    MULTILINE_STRING,        // """foobar"""
+    DOUBLE_LITERAL,          // 13.56/E/e
+    NIL_LITERAL,             // nil
+    COLON,                   // :
+    RETURN_KEYWORD,          // return
+    ELSE_KEYWORD,            // else
+    FUNCTION_KEYWORD,        // func
+    IF_KEYWORD,              // if
+    WHILE_KEYWORD,           // while
+    VAR_KEYWORD,             // var keyword
+    LET_KEYWORD,             // let keyword
+    ARROW,          // ->
+    END_OF_FILE,              // EOF
+    INT_KEYWORD,
+    DOUBLE_KEYWORD,
+    STRING_KEYWORD
+} TokenType;
+
 typedef enum{       //machine states
     start,
     identifier,
@@ -62,10 +64,7 @@ typedef struct token {
   char* value;
 } Token;
 
-
-
 Token get_token();
-Token make_token(TokenType typ, char* hodnota);
-
+Token make_token(TokenType type, char* value);
 
 #endif // LEXER_H 
