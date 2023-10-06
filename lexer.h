@@ -1,4 +1,5 @@
 #ifndef LEXER_H 
+#define LEXER_H 
 
 typedef enum{
     IDENTIFIER,
@@ -34,9 +35,12 @@ typedef enum{
     LET_KEYWORD,             // let keyword
     ARROW,          // ->
     END_OF_FILE,              // EOF
+    STRING_KEYWORD,
+    STRING_NULLABLE_KEYWORD,
     INT_KEYWORD,
+    INT_NULLABLE_KEYWORD,
     DOUBLE_KEYWORD,
-    STRING_KEYWORD
+    DOUBLE_NULLABLE_KEYWORD,
 } TokenType;
 
 typedef enum{       //machine states

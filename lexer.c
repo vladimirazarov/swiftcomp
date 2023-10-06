@@ -200,19 +200,29 @@ Token get_token()
             {
                 ungetc(a, stdin);
             }
-
-            // KEYWORD TESTS
-            if (strcmp(str, "String") == 0 || strcmp(str, "String?") == 0)
+            if (strcmp(str, "String") == 0)
             {
                 return make_token(STRING_KEYWORD, str);
             }
-            else if (strcmp(str, "Int") == 0 || strcmp(str, "Int?") == 0)
+            else if (strcmp(str, "String?") == 0)
+            {
+                return make_token(STRING_NULLABLE_KEYWORD, str);
+            }
+            else if (strcmp(str, "Int") == 0)
             {
                 return make_token(INT_KEYWORD, str);
             }
-            else if (strcmp(str, "Double") == 0 || strcmp(str, "Double?") == 0)
+            else if (strcmp(str, "Int?") == 0)
+            {
+                return make_token(INT_NULLABLE_KEYWORD, str);
+            }
+            else if (strcmp(str, "Double") == 0)
             {
                 return make_token(DOUBLE_KEYWORD, str);
+            }
+            else if (strcmp(str, "Double?") == 0)
+            {
+                return make_token(DOUBLE_NULLABLE_KEYWORD, str);
             }
             if (strcmp(str, "var") == 0)
             {
