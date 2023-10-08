@@ -256,6 +256,10 @@ Token get_token()
             {
                 return make_token(WHILE_KEYWORD, str);
             }
+            if (strcmp(str, "_") == 0)
+            {
+                return make_token(UNDERSCORE, str);
+            }
 
             return make_token(IDENTIFIER, str);
             break;
@@ -447,10 +451,14 @@ Token get_token()
             }
             break;
 
-        case string:
-            // z = 0;
+                case string:
+            z = 0;
+            b = 0;
+            c = 0;
             str = "";
             i = 0;
+            char arr[9];
+            memset(arr, 0, sizeof(arr));
             a = getchar();
             if (a == '"')
             { // if second " is detected its either multiline string or an empty one
@@ -496,16 +504,210 @@ Token get_token()
                     }
                     else if (a == 'u')
                     {
-                        /* \u handling not functional
+                        //   \u handling not functional
                         a = getchar();
                         if (a == '{') {
-                            while ((a <= 57 && a >= 48) || (a >= 65 && a<= 70) || (a >= 97 && a <= 102) || z != 8) {
+                            while ((a <= 57 && a >= 48) || (a >= 65 && a<= 70) || (a >= 97 && a <= 102) || (a != '}' || z != 8)) {
                                 a = getchar();
-                                z++;
-                            }
-                            if (a != '}') {
+                                if (a != '}') {
+                                    arr[z] = a;
+                                    z++;
+                                }
+                                if ( a == '}') {
+                                        for (int y = 0; y < z; y++) {
+                                            c += hextoint(arr[y]) * pwr(16, y);     //ronald mcnutt
+                                        }
+                                        if (c != 0) {
+                                        size_t len = strlen(str);
+                                        char *str2 = malloc(len + 1 + 1);
+                                        strcpy(str2, str);
+                                        if (i>0) {
+                                            free(str);
+                                        }
+                                        str2[len] = c;
+                                        str2[len + 1] = '\0';
+                                        str = str2;
+                                        i++;
+                                        } else {
+                                            size_t len = strlen(str);
+                                            char *str2 = malloc(len + 1 + 1);
+                                            strcpy(str2, str);
+                                            if (i>0) {
+                                            free(str);
+                                            }
+                                            str2[len] = c;
+                                            str2[len + 1] = '\0';
+                                            str = str2;
+                                            i++;
+                                        
+                                        }
+                                    }
+                               else if (!(a <= 57 && a >= 48) || !(a >= 65 && a<= 70) || !(a >= 97 && a <= 102)) { //|| !(a != '}')
+                                    
+                                        size_t len = strlen(str);
+                                        char *str2 = malloc(len + 1 + 2);
+                                        strcpy(str2, str);
+                                        if(i>0){
+                                            free(str);
+                                        }
+                                        str2[len] = 92;
+                                        str2[len + 1] = 'u';
+                                        str2[len + 2] = '\0';
+                                        str = str2;
+                                        i++;
 
-                            }*/
+                                        switch (z) {                //switch>loop
+                                            case 1:
+                                                size_t len = strlen(str);
+                                                char *str2 = malloc(len + 1 + 1);
+                                                strcpy(str2, str);
+                                                if (i>0){
+                                                    free(str);
+                                                }
+                                                str2[len] = arr[0];
+                                                str2[len + 1] = '\0';
+                                                str = str2;
+                                                i++;
+                                                break;
+
+                                                case 2:
+                                                    size_t len = strlen(str);
+                                                    char *str2 = malloc(len + 1 + 2);
+                                                    strcpy(str2, str);
+                                                    if (i>0){
+                                                        free(str);
+                                                    }
+                                                    str2[len] = arr[0];
+                                                    str2[len + 1] = arr[1];
+                                                    str2[len + 2] = '\0';
+                                                    str = str2;
+                                                    i++;
+                                                    break;
+
+                                                case 3:
+                                                    size_t len = strlen(str);
+                                                    char *str2 = malloc(len + 1 + 3);
+                                                    strcpy(str2, str);
+                                                    if (i>0){
+                                                        free(str);
+                                                    }
+                                                    str2[len] = arr[0];
+                                                    str2[len + 1] = arr[1];
+                                                    str2[len + 2] = arr[2];
+                                                    str2[len + 3] = '\0';
+                                                    str = str2;
+                                                    i++;
+                                                    break;
+
+                                                case 4:
+                                                    size_t len = strlen(str);
+                                                    char *str2 = malloc(len + 1 + 4);
+                                                    strcpy(str2, str);
+                                                    if (i>0){
+                                                        free(str);
+                                                    }
+                                                    str2[len] = arr[0];
+                                                    str2[len + 1] = arr[1];
+                                                    str2[len + 2] = arr[2];
+                                                    str2[len + 3] = arr[3];
+                                                    str2[len + 4] = '\0';
+                                                    str = str2;
+                                                    i++;
+                                                    break;
+
+                                                case 5:
+                                                    size_t len = strlen(str);
+                                                    char *str2 = malloc(len + 1 + 5);
+                                                    strcpy(str2, str);
+                                                    if (i>0){
+                                                        free(str);
+                                                    }
+                                                    str2[len] = arr[0];
+                                                    str2[len + 1] = arr[1];
+                                                    str2[len + 2] = arr[2];
+                                                    str2[len + 3] = arr[3];
+                                                    str2[len + 4] = arr[4];
+                                                    str2[len + 5] = '\0';
+                                                    str = str2;
+                                                    i++;
+                                                    break;
+
+                                                case 6:
+                                                    size_t len = strlen(str);
+                                                    char *str2 = malloc(len + 1 + 6);
+                                                    strcpy(str2, str);
+                                                    if (i>0){
+                                                        free(str);
+                                                    }
+                                                    str2[len] = arr[0];
+                                                    str2[len + 1] = arr[1];
+                                                    str2[len + 2] = arr[2];
+                                                    str2[len + 3] = arr[3];
+                                                    str2[len + 4] = arr[4];
+                                                    str2[len + 5] = arr[5];
+                                                    str2[len + 6] = '\0';
+                                                    str = str2;
+                                                    i++;
+                                                    break;
+
+                                                case 7:
+                                                    size_t len = strlen(str);
+                                                    char *str2 = malloc(len + 1 + 7);
+                                                    strcpy(str2, str);
+                                                    if (i>0){
+                                                        free(str);
+                                                    }
+                                                    str2[len] = arr[0];
+                                                    str2[len + 1] = arr[1];
+                                                    str2[len + 2] = arr[2];
+                                                    str2[len + 3] = arr[3];
+                                                    str2[len + 4] = arr[4];
+                                                    str2[len + 5] = arr[5];
+                                                    str2[len + 6] = arr[6];
+                                                    str2[len + 7] = '\0';
+                                                    str = str2;
+                                                    i++;
+                                                    break;
+
+                                                case 8:
+                                                    size_t len = strlen(str);
+                                                    char *str2 = malloc(len + 1 + 8);
+                                                    strcpy(str2, str);
+                                                    if (i>0){
+                                                        free(str);
+                                                    }
+                                                    str2[len] = arr[0];
+                                                    str2[len + 1] = arr[1];
+                                                    str2[len + 2] = arr[2];
+                                                    str2[len + 3] = arr[3];
+                                                    str2[len + 4] = arr[4];
+                                                    str2[len + 5] = arr[5];
+                                                    str2[len + 6] = arr[6];
+                                                    str2[len + 7] = arr[7];
+                                                    str2[len + 8] = '\0';
+                                                    str = str2;
+                                                    i++;
+                                                    break;
+
+                                            
+                                        }
+                                    
+                                }
+                            }
+
+                            } else {                            //braces missing, add u to the string
+                                size_t len = strlen(str);
+                                char *str2 = malloc(len + 1 + 2);
+                                strcpy(str2, str);
+                                if(i>0){
+                                    free(str);
+                                }
+                                str2[len] = 92;
+                                str2[len + 1] = 'u';
+                                str2[len + 2] = '\0';
+                                str = str2;
+                                i++;
+                                }
                     }
                 }
                 size_t len = strlen(str);
