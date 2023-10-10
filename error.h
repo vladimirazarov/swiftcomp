@@ -19,7 +19,7 @@ typedef enum {
 } ErrorCode;
 
 // Function to handle errors
-void handleError(ErrorCode code) {
+void handle_error(ErrorCode code) {
     switch (code) {
         case LEXICAL_ERROR:
             fprintf(stderr, "Error: Incorrect structure of the current lexeme.\n");
