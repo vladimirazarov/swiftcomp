@@ -41,6 +41,7 @@ typedef enum{
     INT_NULLABLE_KEYWORD,
     DOUBLE_KEYWORD,
     DOUBLE_NULLABLE_KEYWORD,
+    UNDERSCORE,
 } TokenType;
 
 typedef enum{       //machine states
