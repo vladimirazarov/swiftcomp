@@ -28,6 +28,8 @@ void parse_assignment_or_function_call(Parser* parser);
 void parse_while_loop(Parser* parser);
 void parse_if_cond(Parser* parser);
 void parse_return_statement(Parser* parser);
+void parse_function_call(Parser* parser);
+void parse_arguments(Parser *parser);
 
 
 #endif // PARSER_H

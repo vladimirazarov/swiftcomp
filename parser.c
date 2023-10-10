@@ -160,15 +160,50 @@ void parse_declaration_or_initialization(Parser *parser)
         accept_token(parser, COLON); // Accept ':'
         parse_type(parser);          // Parse the type
     }
-
-    // Check for optional expression //TODO: OR FUNCTION CALL! (4.4 v zadani)
+    // Check for optional expression or function call
     if (parser->current_token.type == ASSIGNMENT_OPERATOR)
     {
-        accept_token(parser, ASSIGNMENT_OPERATOR); // Accept '='
-        parse_expression(parser);                  // Parse the expression
+        accept_token(parser, ASSIGNMENT_OPERATOR); 
+        parse_expression_or_func_call(parser);
     }
 }
 
+void parse_expression_or_func_call(Parser *parser)
+{
+    if (parser->current_token.type == IDENTIFIER)
+    {
+        // TODO: Perform semantic check in symbol table to determine if identifier is a function or variable/constant
+        //  SymbolType symbol_type = check_symbol_type_in_table(parser->symbol_table, parser->current_token.value);
+        int symbol_type = FUNCTION; // TODO: DELETE THIS!!!
+
+        if (symbol_type == FUNCTION)
+        {
+            accept_token(parser, IDENTIFIER);
+            parse_function_call(parser);
+        }
+        else if (symbol_type == VARIABLE || symbol_type == CONSTANT)
+        {
+            parse_expression(parser);
+        }
+        else
+        {
+            handle_error(SEMANTIC_VAR_ERROR); // TODO: Check if this correct error
+        }
+    }
+    else
+    {
+        parse_expression(parser);
+    }
+}
+
+void parse_function_call(Parser *parser)
+{
+    //TODO: probably also have to contain token with id name, but only if we will connect semantics with parser
+    accept_token(parser, LEFT_PARENTHESIS);  // Accept '('
+    parse_arguments(parser);                 // Parse the arguments
+    accept_token(parser, RIGHT_PARENTHESIS); // Accept ')'
+    return;
+}
 void parse_assignment_or_function_call(Parser *parser)
 {
     // Save the identifier for later use
@@ -178,16 +213,13 @@ void parse_assignment_or_function_call(Parser *parser)
     // Check if it's an assignment or a function call
     if (parser->current_token.type == ASSIGNMENT_OPERATOR)
     {
-        // It's an assignment
+        // It's an assignment, can be an expression or a function call
         accept_token(parser, ASSIGNMENT_OPERATOR); // Accept '='
-        parse_expression(parser);      
+        parse_expression_or_func_call(parser);
     }
     else if (parser->current_token.type == LEFT_PARENTHESIS)
     {
-        // It's a function call
-        accept_token(parser, LEFT_PARENTHESIS);  // Accept '('
-        parse_arguments(parser);                 // Parse the arguments
-        accept_token(parser, RIGHT_PARENTHESIS); // Accept ')'
+        parse_function_call(parser);
     }
     else
     {
@@ -234,7 +266,8 @@ void parse_block(Parser *parser)
 }
 
 // Function to parse a while loop
-void parse_while_loop(Parser *parser) {
+void parse_while_loop(Parser *parser)
+{
     // Expecting 'while' keyword
     accept_token(parser, WHILE_KEYWORD);
 
@@ -246,15 +279,19 @@ void parse_while_loop(Parser *parser) {
 }
 
 // Function to parse an if condition
-void parse_if_cond(Parser *parser) {
+void parse_if_cond(Parser *parser)
+{
     // Expecting 'if' keyword
     accept_token(parser, IF_KEYWORD);
 
     // Parse the expression
-    if (parser->current_token.type == LET_KEYWORD) {
+    if (parser->current_token.type == LET_KEYWORD)
+    {
         accept_token(parser, LET_KEYWORD);
         accept_token(parser, IDENTIFIER);
-    } else {
+    }
+    else
+    {
         parse_expression(parser);
     }
 
@@ -262,7 +299,8 @@ void parse_if_cond(Parser *parser) {
     parse_block(parser);
 
     // Check for optional 'else' part
-    if (parser->current_token.type == ELSE_KEYWORD) {
+    if (parser->current_token.type == ELSE_KEYWORD)
+    {
         accept_token(parser, ELSE_KEYWORD);
         parse_block(parser);
     }
@@ -272,13 +310,81 @@ void parse_expression(Parser *parser)
 {
     printf("parsing expressions\n");
     // TODO: expressions evalutation
-    // TODO: jestli nepridavame funexp, tak je pak jenom potreba overit jestli jde o vyraz,
-    // TODO: nebo o volani funkce
     return;
 }
-void parse_function_definitions(Parser *parser) { return; }
-void parse_return_statement(Parser *parser){};
 
+// Function to parse a return statement
+void parse_return_statement(Parser *parser)
+{
+    // Expecting 'return' keyword
+    accept_token(parser, RETURN_KEYWORD);
+
+    // Check for optional expression
+    if (parser->current_token.type != RIGHT_CURLY_BRACE)
+    {
+        parse_expression(parser);
+    }
+}
+
+// Function to parse arguments
+void parse_arguments(Parser *parser)
+{
+    // Check if there are arguments
+    if (parser->current_token.type != RIGHT_PARENTHESIS)
+    {
+        // Parse the first argument
+        parse_argument(parser);
+
+        // Parse more arguments
+        while (parser->current_token.type == COMMA)
+        {
+            accept_token(parser, COMMA); // Accept ','
+            parse_argument(parser);       // Parse the next argument
+        }
+    }
+}
+
+// Function to parse an individual argument
+void parse_argument(Parser *parser)
+{
+    if (parser->current_token.type == IDENTIFIER)
+    {
+        //TODO: Perform semantic check in symbol table to determine if identifier is a parameter name or variable/constant
+        //TODO: SymbolType symbol_type = check_symbol_type_in_table(parser->symbol_table, parser->current_token.value);
+        typedef enum {PARAMETER_NAME} lol;
+        lol symbol_type = PARAMETER_NAME;
+
+        if (symbol_type == PARAMETER_NAME)
+        {
+            // It's a named argument
+            accept_token(parser, IDENTIFIER); // Accept the identifier as parameter name
+            accept_token(parser, COLON);      // Expect and accept ':'
+        }
+        // else, it's a regular identifier and should be treated as such (fall through to parse_literal_or_id)
+    }
+
+    // Parse the literal or id
+    parse_literal_or_id(parser);
+}
+
+// Function to parse a literal or id
+void parse_literal_or_id(Parser *parser)
+{
+    switch (parser->current_token.type)
+    {
+    case STRING_LITERAL:
+    case INTEGER_LITERAL:
+    case DOUBLE_LITERAL:
+    case IDENTIFIER:
+        accept_token(parser, parser->current_token.type);
+        break;
+    default:
+        handle_error(SYNTACTIC_ERROR);
+        break;
+    }
+}
+
+void parse_function_definitions(Parser *parser) { return; }
 // Main function for testing
 int main()
 {
