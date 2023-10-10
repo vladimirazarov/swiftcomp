@@ -384,7 +384,87 @@ void parse_literal_or_id(Parser *parser)
     }
 }
 
-void parse_function_definitions(Parser *parser) { return; }
+// Function to parse function definitions
+void parse_function_definitions(Parser *parser)
+{
+    while (parser->current_token.type == FUNCTION_KEYWORD)
+    {
+        parse_function_definition(parser);
+    }
+}
+
+// Function to parse a single function definition
+void parse_function_definition(Parser *parser)
+{
+    // Expecting 'func' keyword
+    accept_token(parser, FUNCTION_KEYWORD);
+
+    // Expecting function identifier
+    accept_token(parser, IDENTIFIER);
+
+    // Expecting '('
+    accept_token(parser, LEFT_PARENTHESIS);
+
+    // Parse parameters
+    parse_parameters(parser);
+
+    // Expecting ')'
+    accept_token(parser, RIGHT_PARENTHESIS);
+
+    // Check for optional return type
+    if (parser->current_token.type == ARROW)
+    {
+        accept_token(parser, ARROW); // Accept '->'
+        parse_type(parser);          // Parse the return type
+    }
+
+    // Parse the block
+    parse_block(parser);
+}
+
+// Function to parse parameters
+void parse_parameters(Parser *parser)
+{
+    if (parser->current_token.type == IDENTIFIER || parser->current_token.type == UNDERSCORE)
+    {
+        parse_parameter(parser);
+        parse_more_parameters(parser);
+    }
+}
+
+// Function to parse a single parameter
+void parse_parameter(Parser *parser)
+{
+    // Parse the name (either an identifier or an underscore)
+    if (parser->current_token.type == IDENTIFIER)
+    {
+        accept_token(parser, IDENTIFIER);
+    }
+    else if (parser->current_token.type == UNDERSCORE)
+    {
+        accept_token(parser, UNDERSCORE);
+    }
+
+    // Expecting ':'
+    accept_token(parser, COLON);
+
+    // Parse the type
+    parse_type(parser);
+}
+
+// Function to parse more parameters
+void parse_more_parameters(Parser *parser)
+{
+    while (parser->current_token.type == COMMA)
+    {
+        // Expecting ','
+        accept_token(parser, COMMA);
+
+        // Parse the next parameter
+        parse_parameter(parser);
+    }
+}
+
 // Main function for testing
 int main()
 {
