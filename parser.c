@@ -34,6 +34,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+bool is_return_value;
+
 // Function to create a new parser
 Parser *create_parser()
 {
@@ -139,6 +141,8 @@ void parse_statements(Parser *parser)
         case LEFT_CURLY_BRACE:
             parse_block(parser);
             break;
+        case RIGHT_CURLY_BRACE:
+            return;
         default:
             handle_error(SYNTACTIC_ERROR);
             return;
@@ -172,22 +176,15 @@ void parse_expression_or_func_call(Parser *parser)
 {
     if (parser->current_token.type == IDENTIFIER)
     {
-        // TODO: Perform semantic check in symbol table to determine if identifier is a function or variable/constant
-        //  SymbolType symbol_type = check_symbol_type_in_table(parser->symbol_table, parser->current_token.value);
-        int symbol_type = FUNCTION; // TODO: DELETE THIS!!!
+        accept_token(parser, IDENTIFIER);
 
-        if (symbol_type == FUNCTION)
+        if (parser->current_token.type == LEFT_PARENTHESIS)
         {
-            accept_token(parser, IDENTIFIER);
             parse_function_call(parser);
-        }
-        else if (symbol_type == VARIABLE || symbol_type == CONSTANT)
-        {
-            parse_expression(parser);
         }
         else
         {
-            handle_error(SEMANTIC_VAR_ERROR); // TODO: Check if this correct error
+            parse_expression(parser);
         }
     }
     else
@@ -198,7 +195,6 @@ void parse_expression_or_func_call(Parser *parser)
 
 void parse_function_call(Parser *parser)
 {
-    //TODO: probably also have to contain token with id name, but only if we will connect semantics with parser
     accept_token(parser, LEFT_PARENTHESIS);  // Accept '('
     parse_arguments(parser);                 // Parse the arguments
     accept_token(parser, RIGHT_PARENTHESIS); // Accept ')'
@@ -207,7 +203,6 @@ void parse_function_call(Parser *parser)
 void parse_assignment_or_function_call(Parser *parser)
 {
     // Save the identifier for later use
-    Token identifier = parser->current_token;
     accept_token(parser, IDENTIFIER); // Accept the identifier
 
     // Check if it's an assignment or a function call
@@ -261,7 +256,11 @@ void parse_type(Parser *parser)
 void parse_block(Parser *parser)
 {
     accept_token(parser, LEFT_CURLY_BRACE);  // Accept '{'
-    parse_statements(parser);                // Parse the statements inside the block
+    
+    if (parser->current_token.type != RIGHT_CURLY_BRACE) {
+        parse_statements(parser);  // Parse the statements inside the block only if the block is not empty
+    }
+    
     accept_token(parser, RIGHT_CURLY_BRACE); // Accept '}'
 }
 
@@ -308,8 +307,16 @@ void parse_if_cond(Parser *parser)
 
 void parse_expression(Parser *parser)
 {
-    printf("parsing expressions\n");
-    // TODO: expressions evalutation
+    while(parser->current_token.type == INTEGER_LITERAL ||  
+          parser->current_token.type == STRING_LITERAL  ||  
+          parser->current_token.type == DOUBLE_LITERAL ||  
+          parser->current_token.type == IDENTIFIER     ||  
+          parser->current_token.type == PLUS_OPERATOR ||  
+          parser->current_token.type == LESS_THAN_OPERATOR ||  
+          parser->current_token.type == MINUS_OPERATOR )
+    {
+        advance_token(parser);
+}
     return;
 }
 
@@ -320,7 +327,7 @@ void parse_return_statement(Parser *parser)
     accept_token(parser, RETURN_KEYWORD);
 
     // Check for optional expression
-    if (parser->current_token.type != RIGHT_CURLY_BRACE)
+    if(is_return_value)
     {
         parse_expression(parser);
     }
@@ -349,22 +356,18 @@ void parse_argument(Parser *parser)
 {
     if (parser->current_token.type == IDENTIFIER)
     {
-        //TODO: Perform semantic check in symbol table to determine if identifier is a parameter name or variable/constant
-        //TODO: SymbolType symbol_type = check_symbol_type_in_table(parser->symbol_table, parser->current_token.value);
-        typedef enum {PARAMETER_NAME} lol;
-        lol symbol_type = PARAMETER_NAME;
-
-        if (symbol_type == PARAMETER_NAME)
+        accept_token(parser, IDENTIFIER);
+        if (parser->current_token.type == COLON)
         {
-            // It's a named argument
-            accept_token(parser, IDENTIFIER); // Accept the identifier as parameter name
-            accept_token(parser, COLON);      // Expect and accept ':'
+            accept_token(parser, COLON);
+            parse_literal_or_id(parser);
         }
-        // else, it's a regular identifier and should be treated as such (fall through to parse_literal_or_id)
     }
-
+    else
+    {
     // Parse the literal or id
     parse_literal_or_id(parser);
+    }
 }
 
 // Function to parse a literal or id
@@ -411,11 +414,14 @@ void parse_function_definition(Parser *parser)
     // Expecting ')'
     accept_token(parser, RIGHT_PARENTHESIS);
 
+    is_return_value = false;
+
     // Check for optional return type
     if (parser->current_token.type == ARROW)
     {
         accept_token(parser, ARROW); // Accept '->'
         parse_type(parser);          // Parse the return type
+        is_return_value = true; 
     }
 
     // Parse the block
@@ -445,6 +451,7 @@ void parse_parameter(Parser *parser)
         accept_token(parser, UNDERSCORE);
     }
 
+    accept_token(parser, IDENTIFIER);
     // Expecting ':'
     accept_token(parser, COLON);
 
