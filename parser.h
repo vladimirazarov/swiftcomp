@@ -13,6 +13,14 @@ typedef struct {
     SymbolTable* symbol_table;   // Symbol table
 } Parser;
 
+// Structure to represent AST
+typedef struct TreeNode {
+    TokenType type;
+    char* value;
+    struct TreeNode* left;
+    struct TreeNode* right;
+} TreeNode;
+
 // Function prototypes
 Parser* create_parser();
 void free_parser(Parser* parser);
@@ -24,7 +32,7 @@ void parse_statements(Parser* parser);
 void parse_type(Parser* parser);
 void parse_declaration_or_initialization(Parser* parser);
 void parse_block(Parser* parser);
-void parse_expression(Parser* parser);
+void parse_expression(Parser* parser, Token token);
 void parse_function_definitions(Parser* parser);
 void parse_assignment_or_function_call(Parser* parser);
 void parse_while_loop(Parser* parser);
@@ -39,5 +47,8 @@ void parse_parameters(Parser *parser);
 void parse_parameter(Parser *parser);
 void parse_more_parameters(Parser *parser);
 void parse_expression_or_func_call(Parser *parser);
-
+TreeNode* parde_operand(int* index, Token** tokens, int tokenCount);
+TreeNode* parse_operator(int* index, Token** tokens, int tokenCount, int minPrecedence);
+TreeNode* make_node(TokenType type, char* value);
+int get_operator_precedence(Token token);
 #endif // PARSER_H
