@@ -27,10 +27,12 @@
 //    Assignment:  c = 3;
 //    Initialization: let c = 3;
 
+#include "expressions.h"
 #include "parser.h"
 #include "lexer.h"
 #include "error.h"
 #include "symbol_table.h"
+#include "ast_tree.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -185,12 +187,12 @@ void parse_expression_or_func_call(Parser *parser)
         }
         else
         {
-            parse_expression(parser, save_token);
+            get_expression_ast(parser, save_token);
         }
     }
     else
     {
-        parse_expression(parser, parser->current_token);
+        get_expression_ast(parser, parser->current_token);
     }
 }
 
@@ -222,6 +224,13 @@ void parse_assignment_or_function_call(Parser *parser)
         // Syntax error: Expected either '=' for assignment or '(' for function call
         handle_error(SYNTACTIC_ERROR);
     }
+}
+
+// Function to get ast from expression
+TreeNode* get_expression_ast(Parser *parser, Token token){
+    TreeNode* expression = parse_expression(parser, token, 0);
+    print_tree(expression); //Used for expression testing
+    return expression;
 }
 
 // Function to parse type
@@ -272,7 +281,7 @@ void parse_while_loop(Parser *parser)
     accept_token(parser, WHILE_KEYWORD);
 
     // Parse the expression
-    parse_expression(parser, parser->current_token);
+    get_expression_ast(parser, parser->current_token);
 
     // Parse the block
     parse_block(parser);
@@ -292,7 +301,7 @@ void parse_if_cond(Parser *parser)
     }
     else
     {
-        parse_expression(parser, parser->current_token);
+        get_expression_ast(parser, parser->current_token);
     }
 
     // Parse the block
@@ -306,164 +315,6 @@ void parse_if_cond(Parser *parser)
     }
 }
 
-int get_operator_precedence(Token token) {
-    if (token.type == PLUS_OPERATOR || token.type == MINUS_OPERATOR) return 1;
-    if (token.type == ASSIGNMENT_OPERATOR || 
-        token.type == EQUALITY_OPERATOR || 
-        token.type == NOT_EQUAL_OPERATOR || 
-        token.type == LESS_THAN_OPERATOR || 
-        token.type == LESS_THAN_EQUAL_OPERATOR || 
-        token.type == GREATER_THAN_OPERATOR || 
-        token.type == GREATER_THAN_EQUAL_OPERATOR) return 2;
-    if (token.type == MULTIPLICATION_OPERATOR || token.type == DIVISION_OPERATOR) return 3;
-    return 0; // Lowest priority
-}
-
-TreeNode* make_node(TokenType type, char* value) {
-    TreeNode* node = (TreeNode*)malloc(sizeof(TreeNode));
-    node->type = type;
-    node->value = value;
-    node->left = NULL;
-    node->right = NULL;
-    return node;
-}
-
-TreeNode* parse_operand(int* index, Token** tokens, int token_count) {
-    if (*index >= token_count) {
-        return NULL;
-    }
-    //Save current token for later indexing
-    Token *token = tokens[*index];
-    //Handle expression in parenthesis
-    if (token->type == LEFT_PARENTHESIS) {
-        (*index)++;
-        TreeNode* expression = parse_operator(index, tokens, token_count, 0);
-        if (*index >= token_count || tokens[*index]->type != RIGHT_PARENTHESIS) {
-            // Missing or mismatched parentheses
-            printf("error5");
-            handle_error(SYNTACTIC_ERROR); 
-        } else {
-            //Next token
-            (*index)++;
-        }
-        return expression;
-    } else if (*index < token_count) {
-        //Next token
-        (*index)++;
-        return make_node(token->type, token->value);
-    } else {
-        //Unexpected end of expression
-        printf("error4");
-        handle_error(SYNTACTIC_ERROR); 
-    }
-    return NULL;
-}
-
-TreeNode* parse_operator(int* index, Token** tokens, int token_count, int minimal_precedence) {
-
-    //If expression starts with operator
-    if(get_operator_precedence(*tokens[*index])){
-        printf("error1");
-        handle_error(SYNTACTIC_ERROR);
-    }
-    //Allocate first var to left leaf
-    TreeNode* left = parse_operand(index, tokens, token_count);
-    while (*index < token_count && tokens[*index]) {
-
-        //Check if operator
-        if(!get_operator_precedence(*tokens[*index]) && tokens[*index]->type != RIGHT_PARENTHESIS){
-            printf("%s ", tokens[*index]->value);
-            printf("error2");
-            handle_error(SYNTACTIC_ERROR);
-        } else if (tokens[*index]->type == RIGHT_PARENTHESIS){
-            return left;
-        }
-
-        int precedence = get_operator_precedence(*tokens[*index]);
-        
-        if (precedence < minimal_precedence) {
-            return left;
-        }
-        //Save operator for later indexing
-        int operator_index = *index;
-        //Next token
-        (*index)++;
-        //Allocate second var to right leaf
-        TreeNode* right = parse_operator(index, tokens, token_count, precedence + 1);
-        if (right == NULL) {
-            // Invalid expression on the right
-            printf("error3");
-            handle_error(SYNTACTIC_ERROR); 
-            return left;
-        }
-        //Make operator root
-        TreeNode* new_left = make_node(tokens[operator_index]->type, tokens[operator_index]->value);
-        new_left->left = left;
-        new_left->right = right;
-        left = new_left;
-    }
-    return left;
-}
-
-int evaluate_expression(TreeNode* node) {
-    if (node->type == INTEGER_LITERAL) {
-        return atoi(node->value);
-    } else {
-        int left_value = evaluate_expression(node->left);
-        int right_value = evaluate_expression(node->right);
-        if (node->type == PLUS_OPERATOR) return left_value + right_value;
-        if (node->type == MINUS_OPERATOR) return left_value - right_value;
-        if (node->type == MULTIPLICATION_OPERATOR) return left_value * right_value;
-        if (node->type == DIVISION_OPERATOR) return left_value / right_value;
-    }
-    return 0;
-}
-
-void parse_expression(Parser *parser, Token token)
-{
-    int token_count = 0;
-    int index = 0;
-    bool parsed = false;
-    Token** tokens = malloc(sizeof(Token));
-    while(token.type == INTEGER_LITERAL ||  
-          token.type == STRING_LITERAL  ||  
-          token.type == DOUBLE_LITERAL ||  
-          token.type == IDENTIFIER     ||  
-          token.type == MINUS_OPERATOR ||
-          token.type == PLUS_OPERATOR ||
-          token.type == EQUALITY_OPERATOR || 
-          token.type == NOT_EQUAL_OPERATOR || 
-          token.type == LESS_THAN_OPERATOR || 
-          token.type == LESS_THAN_EQUAL_OPERATOR ||
-          token.type == GREATER_THAN_OPERATOR || 
-          token.type == GREATER_THAN_EQUAL_OPERATOR ||
-          token.type == MULTIPLICATION_OPERATOR ||
-          token.type == DIVISION_OPERATOR ||
-          token.type == RIGHT_PARENTHESIS ||
-          token.type == LEFT_PARENTHESIS)
-        {
-            if(token.value != parser->current_token.value){
-                tokens[token_count] = (Token*)malloc(sizeof(Token));
-                tokens[token_count]->type = token.type;
-                tokens[token_count]->value = token.value;
-                token_count++;
-                token = parser->current_token;
-            }
-            tokens[token_count] = (Token*)malloc(sizeof(Token));
-            tokens[token_count]->type = token.type;
-            tokens[token_count]->value = token.value;
-            token_count++;
-            advance_token(parser);
-            token = parser->current_token;
-            parsed = true;
-        }
-        if(parsed){
-            //TreeNode* expression_tree = parse_operator(&index, tokens, token_count, 0);
-            parse_operator(&index, tokens, token_count, 0);
-        }
-    return;
-}
-
 // Function to parse a return statement
 void parse_return_statement(Parser *parser)
 {
@@ -473,7 +324,7 @@ void parse_return_statement(Parser *parser)
     // Check for optional expression
     if(is_return_value)
     {
-        parse_expression(parser, parser->current_token);
+        get_expression_ast(parser, parser->current_token);
     }
 }
 

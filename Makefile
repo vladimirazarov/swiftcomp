@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -g
 
 # Object files
-OBJ = parser.o lexer.o symbol_table.o
+OBJ = parser.o lexer.o symbol_table.o expressions.o ast_tree.o error.o
 
 # Target executable
 TARGET = parser
@@ -23,6 +23,15 @@ lexer.o: lexer.c lexer.h
 
 symbol_table.o: symbol_table.c symbol_table.h
 	$(CC) $(CFLAGS) -c symbol_table.c
+
+ast_tree.o: ast_tree.c ast_tree.h
+	$(CC) $(CFLAGS) -c ast_tree.c
+
+expressions.o: expressions.c expressions.h
+	$(CC) $(CFLAGS) -c expressions.c
+
+error.o: error.c error.h
+	$(CC) $(CFLAGS) -c error.c
 
 # Run tests
 test: $(TARGET)
