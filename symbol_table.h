@@ -69,6 +69,8 @@ typedef struct {
     Modifier modifier;   
     // Information about the function (NULL if the symbol is not a function)
     FunctionInfo *functionInfo;
+    // Nullable or not 
+    bool isNullable;
 } Symbol;
 
 typedef struct AVLNode {
@@ -82,10 +84,10 @@ typedef struct SymbolTable {
     AVLNode *root;
 } SymbolTable;
 
-SymbolTable* initSymbolTable();
-void insertSymbol(SymbolTable* table, Symbol symbol);
-Symbol* findSymbol(SymbolTable* table, char* name);
-void deleteSymbol(SymbolTable* table, char* name);
-Symbol createSymbol(char *name, Token *data, Scope scope, Modifier modifier, FunctionInfo *functionInfo);
-void freeSymbolTable(SymbolTable* table);
+SymbolTable* init_symbol_table();
+void insert_symbol(SymbolTable* table, Symbol symbol);
+Symbol* find_symbol(SymbolTable* table, char* name);
+void delete_symbol(SymbolTable* table, char* name);
+Symbol create_symbol(char *name, Token *data, Scope scope, Modifier modifier, FunctionInfo *functionInfo, bool isNullable);
+void free_symbol_table(SymbolTable* table);
 #endif // SYMBOL_TABLE_H 

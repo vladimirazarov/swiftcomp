@@ -27,12 +27,15 @@ SECTIONS
 <declaration> → var id : <type>
 <declaration> → let id : <type>
 
-<declaration-initialization> → let id <optional-type> = <expression>
-<declaration-initialization> → var id <optional-type> = <expression>
+<declaration-initialization> → let id <optional-type> = <expression-or-func-call>
+<declaration-initialization> → var id <optional-type> = <expression-or-func-call>
 <optional-type> → : <type>
 <optional-type> → ε
 
-<assignment> → id = <expression>
+<assignment> → id = <expression-or-func-call>
+<expression-or-func-call> -> <expression>
+<expression-or-func-call> -> <function-call>
+
 
 <function-call> → <optional-var-declaration> id = id ( <arguments> )
 <function-call> → id ( <arguments> )
@@ -41,8 +44,9 @@ SECTIONS
 <optional-var-declaration> → ε
 <arguments> → <argument> <more-arguments>
 <arguments> → ε
-<argument> → <name> : <expression>
-<argument> → <expression>
+<argument> → <name> : <litreal-or-id>
+<argument> → <literal-or-id>
+<argument> → string-literal | int-literal | double-literal | id
 <more-arguments> → , <argument> <more-arguments>
 <more-arguments> → ε
 
@@ -58,7 +62,7 @@ SECTIONS
 <else-part> → ε 
 
 <block> → { <statements> }
------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 FUNCTIONS
@@ -81,8 +85,11 @@ FUNCTIONS
 TYPES
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 <type> → Int
+<type> → Int_nullable
 <type> → Double
+<type> → Double-nullable
 <type> → String
+<type> → String-nullable
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 
 <expression> → PREC_ANALYSIS

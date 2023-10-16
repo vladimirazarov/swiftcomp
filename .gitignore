@@ -1,1 +1,8 @@
 .vscode/
+lexer.o
+parser.o
+parser.exe
+symbol_table.o
+ast_tree.o
+expressions.o
+error.o

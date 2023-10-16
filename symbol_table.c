@@ -15,7 +15,7 @@
 #include "stdlib.h"
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-Symbol create_symbol(char *name, Token *data, Scope scope, Modifier modifier, FunctionInfo *functionInfo) {
+Symbol create_symbol(char *name, Token *data, Scope scope, Modifier modifier, FunctionInfo *functionInfo, bool isNullable) {
     Symbol sym;
     sym.name = name;
     sym.data = data;  
@@ -23,6 +23,7 @@ Symbol create_symbol(char *name, Token *data, Scope scope, Modifier modifier, Fu
     sym.scope = scope;
     sym.modifier = modifier;
     sym.functionInfo = functionInfo;
+    sym.isNullable = false;
     return sym;
 }
 
@@ -95,33 +96,33 @@ AVLNode* insert_node(AVLNode* node, char* name, Symbol symbol) {
     }
 
     if (strcmp(name, node->symbol.name) < 0) {
-        node->left = insertNode(node->left, name, symbol);
+        node->left = insert_node(node->left, name, symbol);
     } else if (strcmp(name, node->symbol.name) > 0) {
-        node->right = insertNode(node->right, name, symbol);
+        node->right = insert_node(node->right, name, symbol);
     } else {
         return node; 
     }
 
     node->height = 1 + max(height(node->left), height(node->right));
 
-    int balance = getBalance(node);
+    int balance = get_balance(node);
 
     if (balance > 1 && strcmp(name, node->left->symbol.name) < 0) {
-        return rightRotate(node);
+        return right_rotate(node);
     }
 
     if (balance < -1 && strcmp(name, node->right->symbol.name) > 0) {
-        return leftRotate(node);
+        return left_rotate(node);
     }
 
     if (balance > 1 && strcmp(name, node->left->symbol.name) > 0) {
-        node->left = leftRotate(node->left);
-        return rightRotate(node);
+        node->left = left_rotate(node->left);
+        return right_rotate(node);
     }
 
     if (balance < -1 && strcmp(name, node->right->symbol.name) < 0) {
-        node->right = rightRotate(node->right);
-        return leftRotate(node);
+        node->right = right_rotate(node->right);
+        return left_rotate(node);
     }
 
     return node;
@@ -147,9 +148,9 @@ AVLNode* delete_node(AVLNode* root, char* name) {
     }
 
     if (strcmp(name, root->symbol.name) < 0) {
-        root->left = deleteNode(root->left, name);
+        root->left = delete_node(root->left, name);
     } else if (strcmp(name, root->symbol.name) > 0) {
-        root->right = deleteNode(root->right, name);
+        root->right = delete_node(root->right, name);
     } else {
         if ((root->left == NULL) || (root->right == NULL)) {
             AVLNode* temp = root->left ? root->left : root->right;
@@ -163,9 +164,9 @@ AVLNode* delete_node(AVLNode* root, char* name) {
 
             free(temp);
         } else {
-            AVLNode* temp = minValueNode(root->right);
+            AVLNode* temp = min_value_node(root->right);
             root->symbol = temp->symbol;
-            root->right = deleteNode(root->right, temp->symbol.name);
+            root->right = delete_node(root->right, temp->symbol.name);
         }
     }
 
@@ -175,25 +176,25 @@ AVLNode* delete_node(AVLNode* root, char* name) {
 
     root->height = 1 + max(height(root->left), height(root->right));
 
-    int balance = getBalance(root);
+    int balance = get_balance(root);
 
 
-    if (balance > 1 && getBalance(root->left) >= 0) {
-        return rightRotate(root);
+    if (balance > 1 && get_balance(root->left) >= 0) {
+        return right_rotate(root);
     }
 
-    if (balance > 1 && getBalance(root->left) < 0) {
-        root->left = leftRotate(root->left);
-        return rightRotate(root);
+    if (balance > 1 && get_balance(root->left) < 0) {
+        root->left = left_rotate(root->left);
+        return right_rotate(root);
     }
 
-    if (balance < -1 && getBalance(root->right) <= 0) {
-        return leftRotate(root);
+    if (balance < -1 && get_balance(root->right) <= 0) {
+        return left_rotate(root);
     }
 
-    if (balance < -1 && getBalance(root->right) > 0) {
-        root->right = rightRotate(root->right);
-        return leftRotate(root);
+    if (balance < -1 && get_balance(root->right) > 0) {
+        root->right = right_rotate(root->right);
+        return left_rotate(root);
     }
 
     return root;
@@ -201,7 +202,7 @@ AVLNode* delete_node(AVLNode* root, char* name) {
 
 void insert_symbol(SymbolTable* table, Symbol symbol) {
     if (!table) return;
-    table->root = insertNode(table->root, symbol.name, symbol);
+    table->root = insert_node(table->root, symbol.name, symbol);
 }
 
 Symbol* find_symbol(SymbolTable* table, char* name) {
@@ -211,7 +212,7 @@ Symbol* find_symbol(SymbolTable* table, char* name) {
 
 void delete_symbol(SymbolTable* table, char* name) {
     if (!table) return;
-    table->root = deleteNode(table->root, name);
+    table->root = delete_node(table->root, name);
 }
 
 void update_symbol_value(SymbolTable *table, char *name, void *newValue) {
@@ -229,8 +230,8 @@ void free_node(AVLNode* node) {
         return;
     }
 
-    freeNode(node->left);
-    freeNode(node->right);
+    free_node(node->left);
+    free_node(node->right);
 
     free(node);
 }
@@ -240,7 +241,7 @@ void free_symbol_table(SymbolTable* table) {
         return;
     }
 
-    freeNode(table->root);
+    free_node(table->root);
 
     free(table);
 }
