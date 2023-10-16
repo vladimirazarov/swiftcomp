@@ -49,6 +49,7 @@ Token get_token()
     char *str;
     int i;
     int z;
+    int k;
     while (1)
     {
         switch (State)
@@ -457,8 +458,10 @@ Token get_token()
             //c = 0;
             str = "";
             i = 0;
+            int cflag = 0;
+            int bflag = 0;
             char arr[9];
-            memset(arr, 0, sizeof(arr));
+            //memset(arr, 0, sizeof(arr));
             a = getchar();
             if (a == '"')
             { // if second " is detected its either multiline string or an empty one
@@ -477,9 +480,11 @@ Token get_token()
             }
             while (a != '"' && a > 31)
             {
-                int cflag = 0;
+                int y;
+                y = 0;
                 z = 0;
                 c = 0;
+                k = 0;
                 if (a == 92)
                 {
                     a = getchar();
@@ -509,7 +514,7 @@ Token get_token()
                         a = getchar();
                         if (a == '{') {
                             a = getchar();
-                           /* if (a != '"') { //handle case where quotes are placed directly behind the first bracket
+                            if (a != '"') { //handle case where quotes are placed directly behind the first bracket
                                 ungetc(a, stdin);
                             } else {
                                 size_t len = strlen(str);
@@ -526,17 +531,21 @@ Token get_token()
                                 i++;
                                 State = stringvalid;
                                 break;
-                            }*/
-                            while ((a <= 57 && a >= 48) || (a >= 65 && a<= 70) || (a >= 97 && a <= 102) || (a != '}' || z != 8)) {
-                                a = getchar();
+                            }
+                            while ((a <= 57 && a >= 48) || (a >= 65 && a<= 70) || (a >= 97 && a <= 102) || z < 8) {
                                 if (a != '}') {
                                     arr[z] = a;
                                     z++;
                                 }
+                                a = getchar();
                                 if ( a == '}') {
-                                        for (int y = 0; y < z; y++) {
-                                            c += hextoint(arr[y]) * pwr(16, y);     //ronald mcnutt
+                                        k = z;
+                                        while (z != 0) {
+                                            z--;
+                                            c += hextoint(arr[y]) * pwr(16, z);     //ronald mcnutt
+                                            y++;
                                         }
+
                                         if (c != 0) {
                                         size_t len = strlen(str);
                                         char *str2 = malloc(len + 1 + 1);
@@ -548,8 +557,10 @@ Token get_token()
                                         str2[len + 1] = '\0';
                                         str = str2;
                                         i++;
+                                        a = getchar();
                                         break;
-                                        } else {
+                                        } 
+                                        else if (c == 0) {
                                             size_t len = strlen(str);
                                             char *str2 = malloc(len + 1 + 4);
                                             strcpy(str2, str);
@@ -563,12 +574,12 @@ Token get_token()
                                             str2[len + 4] = '\0';
                                             str = str2;
                                             i++;
+                                            //a = getchar();
                                             break;
                                         
                                         }
                                     }
-                               else if (!(a <= 57 && a >= 48) || !(a >= 65 && a<= 70) || !(a >= 97 && a <= 102)) { //|| !(a != '}')
-                                    
+                               else if (!(a <= 57 && a >= 48) && !(a >= 65 && a<= 70) && !(a >= 97 && a <= 102) && !(a == '"')) {
                                         size_t len = strlen(str);
                                         char *str2 = malloc(len + 1 + 3);
                                         strcpy(str2, str);
@@ -730,6 +741,23 @@ Token get_token()
                                             break;
                                         }
                                     
+                                } 
+                                else if (a == '"') { //open
+                                    size_t len = strlen(str);
+                                    char *str2 = malloc(len + 1 + 3);
+                                    strcpy(str2, str);
+                                    if(i>0){
+                                        free(str);
+                                    }
+                                    str2[len] = 92;
+                                    str2[len + 1] = 'u';
+                                    str2[len + 2] = '{';
+                                    str2[len + 3] = '\0';
+                                    str = str2;
+                                    i++;
+
+                                    break;
+
                                 }
                             }
 
@@ -749,6 +777,9 @@ Token get_token()
                                 }
                     }
                 }
+                if (a == '"') {
+                    break;
+                }
                 size_t len = strlen(str);
                 char *str2 = malloc(len + 1 + 1);
                 strcpy(str2, str);
@@ -765,6 +796,7 @@ Token get_token()
             if (a == '"')
             {
                 State = stringvalid;
+                break;
             }
             else
             {
