@@ -101,7 +101,7 @@ Token get_token()
                 State = identifier;
             }
             else if (a == '"')
-            { // let and var, multiline string handling missing
+            { //multiline string handling missing
                 State = string;
             }
             else if (a >= 48 && a <= 57)
@@ -171,6 +171,10 @@ Token get_token()
             else if (a == EOF)
             {
                 return make_token(END_OF_FILE, NULL);
+            }
+            else if (a == '?')
+            {
+                State = qmark;
             }
 
             else
@@ -537,6 +541,30 @@ Token get_token()
                                     arr[z] = a;
                                     z++;
                                 }
+                                if (z > 8) { //to je tak v pici
+                                    size_t len = strlen(str);
+                                    char *str2 = malloc(len + 1 + 11);
+                                    strcpy(str2, str);
+                                    if (i>0){
+                                        free(str);
+                                    }
+                                    str2[len] = 92;
+                                    str2[len + 1] = 'u';
+                                    str2[len + 2] = '{';
+                                    str2[len + 3] = arr[0];
+                                    str2[len + 4] = arr[1];
+                                    str2[len + 5] = arr[2];
+                                    str2[len + 6] = arr[3];
+                                    str2[len + 7] = arr[4];
+                                    str2[len + 8] = arr[5];
+                                    str2[len + 9] = arr[6];
+                                    str2[len + 10] = arr[7];
+                                    str2[len + 11] = '\0';
+                                    str = str2;
+                                    i++;
+                                    cflag = 1;
+                                    break;
+                                }
                                 a = getchar();
                                 if ( a == '}') {
                                         k = z;
@@ -830,8 +858,8 @@ Token get_token()
             a = getchar();
             if (a != '=')
             {
-                fprintf(stderr, "unexpected symbol: !");
-                exit(1);
+                ungetc(a, stdin);
+                return make_token(EXCLAMATION_MARK, "!");
             }
             else
             {
@@ -880,6 +908,19 @@ Token get_token()
             else
             {
                 return make_token(ARROW, "->");
+            }
+            break;
+
+        case qmark:
+            a = getchar();
+            if (a != '?')
+            {
+                fprinf(stderr, "unexpected symbol: ?");
+                exit(1);
+            }
+            else
+            {
+                return make_token(DOUBLE_QMARK_OPERATOR, "??");
             }
             break;
         }

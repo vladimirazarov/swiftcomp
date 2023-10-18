@@ -42,6 +42,8 @@ typedef enum{
     DOUBLE_KEYWORD,
     DOUBLE_NULLABLE_KEYWORD,
     UNDERSCORE,
+    EXCLAMATION_MARK,
+    DOUBLE_QMARK_OPERATOR,
 } TokenType;
 
 typedef enum{       //machine states
@@ -62,6 +64,7 @@ typedef enum{       //machine states
     mt0,
     meq,
     mins,
+    qmark,
 } State;
 
 typedef struct token {
