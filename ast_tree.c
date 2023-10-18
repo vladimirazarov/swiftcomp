@@ -3,6 +3,7 @@
 #include "parser.h"
 #include <stdio.h>
 
+// Make node for expression subtree
 TreeNode* make_node(TokenType type, char* value) {
     TreeNode* node = (TreeNode*)malloc(sizeof(TreeNode));
     node->type = type;
