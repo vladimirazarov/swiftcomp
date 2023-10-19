@@ -915,7 +915,8 @@ Token get_token()
             a = getchar();
             if (a != '?')
             {
-                ungetc(a, stdin);
+                fprintf(stderr, "unexpected symbol: ?");
+                exit(1);
             }
             else
             {
