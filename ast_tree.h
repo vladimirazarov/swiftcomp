@@ -75,6 +75,7 @@ typedef enum {
     AST_INTERNAL_NAME,
     AST_INITIALIZATION,
     AST_EXPRESSION,
+    AST_FUNCTION_CALL_IN_ASSIGNMENT
 } ASTNodeType;
 
 // Structure to represent AST

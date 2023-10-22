@@ -153,6 +153,8 @@ const char *get_node_type_name(int type)
         return "AST_INITIALIZATION";
     case AST_EXPRESSION:
         return "AST_EXPRESSION";
+    case AST_FUNCTION_CALL_IN_ASSIGNMENT:
+        return "AST_FUNCTION_CALL_IN_ASSIGNMENT";
     default:
         return "UNKNOWN";
     }
@@ -263,7 +265,7 @@ void semantic_analysis(TreeNode *node, SymbolTable *table)
     switch (node->type)
     {
     case AST_INITIALIZATION:
-        printf("DECLARATION\n");
+        printf("INITIALIZATION\n");
         printf("PARTS: ");
 
         TreeNode *currentNode = node->left;
@@ -275,10 +277,30 @@ void semantic_analysis(TreeNode *node, SymbolTable *table)
         printf("\n");
         // Perform semantic checks and add to symbol table
         break;
+    case AST_DECLARATION:
+        printf("DECLARATION\n");
+        break;
     case AST_ASSIGNMENT:
+        printf("ASSIGNMENT\n");
         // Perform semantic checks for assignment
         break;
-        // ... handle other node types
+    case AST_FUNCTION_CALL:
+        printf("FUNCTION CALL\n");
+        break;
+    case AST_BLOCK:
+        printf("BLOCK\n");
+        break;
+    case AST_LOOP:
+        printf("LOOP\n");
+        break;
+    case AST_CONDITIONAL:
+        printf("CONDITIONAL\n");
+        break;
+    case AST_FUNCTION_DEFINITION:
+        printf("FUNCTION DEFINITON\n");
+        break;
+    default:
+        break;
     }
 
     // Recursive calls
