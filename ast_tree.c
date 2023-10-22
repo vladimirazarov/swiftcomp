@@ -28,7 +28,9 @@ void print_tree(TreeNode *root) {
     if (root == NULL) {
         return;
     }
-    fprintf(stdout, "%s ", root->value);
+    if(root->value != NULL){
+        fprintf(stdout, "%s ", root->value);
+    }
     print_tree(root->left);
     print_tree(root->right);
 }
