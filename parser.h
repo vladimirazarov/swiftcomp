@@ -40,4 +40,5 @@ TreeNode *parse_parameter(Parser *parser);
 TreeNode *parse_more_parameters(Parser *parser);
 TreeNode *parse_expression_or_func_call(Parser *parser, ASTNodeType);
 TreeNode *get_expression_ast(Parser *parser, Token token);
+TreeNode *parse_more_sections(Parser *parser);
 #endif // PARSER_H

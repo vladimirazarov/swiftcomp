@@ -20,30 +20,23 @@ int get_operator_precedence(TokenType token) {
     return 0;
 }
 
-//Function to get operand for expression
-TreeNode* get_operand(Token token, TreeNode* left) {
-
+// Function to get operand for expression
+TreeNode* get_operand(Token token) {
+    TreeNode* left = make_node(token.type, token.value, 0);
     if(token.type == IDENTIFIER || 
         token.type == INTEGER_LITERAL || 
         token.type == DOUBLE_LITERAL || 
-        token.type == STRING_LITERAL){
-        left->value = token.value;
-        left->type = token.type;
+        token.type == STRING_LITERAL) {
         return left;
     }
     handle_error(SYNTACTIC_ERROR);
     return NULL;
 }
 
-//Function to parse expression and make a syntactically correct ast
-TreeNode* parse_expression(Parser *parser, Token token, int min_precedence)
-{
-    //Allocate memory for ast
-    TreeNode* expression_tree = (TreeNode*)malloc(sizeof(TreeNode));
-    expression_tree->children[0] = NULL;
-    expression_tree->children[1] = NULL;
-
-    //Handle parenthesis
+// Function to parse expression and make a syntactically correct AST
+TreeNode* parse_expression(Parser *parser, Token token, int min_precedence) {
+    // Handle the operand or parenthesis to get the left-most element
+    TreeNode* expression_tree;
     if (parser->current_token.type == LEFT_PARENTHESIS) {
         advance_token(parser);
         expression_tree = parse_expression(parser, parser->current_token, 0);
@@ -51,18 +44,17 @@ TreeNode* parse_expression(Parser *parser, Token token, int min_precedence)
             handle_error(SYNTACTIC_ERROR);
         }
         advance_token(parser);
-    } 
-    //Get first operand of expression
-    else {
+    } else {
         if(parser->current_token.value != token.value){
-            expression_tree = get_operand(token, expression_tree);
+            expression_tree = get_operand(token);
         } else {
-            expression_tree = get_operand(parser->current_token, expression_tree);
+            expression_tree = get_operand(parser->current_token);
             advance_token(parser);
         }
     }
-    
-    while(parser->current_token.type == MINUS_OPERATOR ||
+
+    // Process operators
+     while(parser->current_token.type == MINUS_OPERATOR ||
           parser->current_token.type == PLUS_OPERATOR ||
           parser->current_token.type == EQUALITY_OPERATOR || 
           parser->current_token.type == NOT_EQUAL_OPERATOR || 
@@ -75,28 +67,23 @@ TreeNode* parse_expression(Parser *parser, Token token, int min_precedence)
           parser->current_token.type == LEFT_PARENTHESIS ||
           parser->current_token.type == EXCLAMATION_MARK ||
           parser->current_token.type == DOUBLE_QMARK_OPERATOR) {
-            
         int precedence = get_operator_precedence(parser->current_token.type);
+        if (precedence < min_precedence) break;
 
-        if(precedence < min_precedence){
-            break;
-        } 
-        //Get operator and second operand of expression
-        if(precedence >= min_precedence && precedence){
-            //Handle unary operators
-            if(parser->current_token.type == EXCLAMATION_MARK){
-                TreeNode* new_left = make_node(parser->current_token.type, parser->current_token.value, 2);
-                advance_token(parser);
-                new_left->children[1] = NULL;
-                new_left->children[0] = expression_tree;
-                expression_tree = new_left;
-            } else{
-                TreeNode* new_left = make_node(parser->current_token.type, parser->current_token.value, 2);
-                advance_token(parser);
+        if(precedence >= min_precedence && precedence) {
+            TreeNode* new_node = make_node(parser->current_token.type, parser->current_token.value, 0);
+            add_child(new_node, expression_tree); // Add the current expression_tree as a child
+            advance_token(parser);
+            
+            // Unary operator
+            if(parser->current_token.type == EXCLAMATION_MARK) {
+                expression_tree = new_node;
+            } 
+            // Binary operator
+            else {
                 TreeNode* right = parse_expression(parser, parser->current_token, precedence + 1);
-                new_left->children[0] = expression_tree;
-                new_left->children[1] = right;
-                expression_tree = new_left;
+                add_child(new_node, right); // Add the right-hand side as another child
+                expression_tree = new_node;
             }
         } else {
             handle_error(SYNTACTIC_ERROR);

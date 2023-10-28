@@ -1,6 +1,7 @@
 #ifndef AST_TREE_H
 #define AST_TREE_H
 #include "lexer.h"
+#include "stdlib.h"
 
 typedef enum {
     AST_IDENTIFIER = IDENTIFIER,
@@ -75,7 +76,8 @@ typedef enum {
     AST_INTERNAL_NAME,
     AST_INITIALIZATION,
     AST_EXPRESSION,
-    AST_FUNCTION_CALL_IN_ASSIGNMENT
+    AST_FUNCTION_CALL_IN_ASSIGNMENT,
+    AST_MORE_SECTIONS
 } ASTNodeType;
 
 // Structure to represent AST
@@ -88,6 +90,6 @@ typedef struct TreeNode {
 
 // Function prototypes
 TreeNode* make_node(ASTNodeType type, char* value, int initial_child_capacity);
+void print_ast(TreeNode *root, int indent_level);
 //void free_leaf(TreeNode* leaf);
-//void print_tree(TreeNode *root);
 #endif

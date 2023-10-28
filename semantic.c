@@ -160,154 +160,59 @@ const char *get_node_type_name(int type)
     }
 }
 
-// Function to evaluate expression
-int evaluate_expression(TreeNode *node)
-{
-    if (node->type == INTEGER_LITERAL)
-    {
-        return atoi(node->value);
-    }
-    else
-    {
-        int left_value = evaluate_expression(node->left);
-        int right_value = evaluate_expression(node->right);
-        if (node->type == PLUS_OPERATOR)
-            return left_value + right_value;
-        if (node->type == MINUS_OPERATOR)
-            return left_value - right_value;
-        if (node->type == MULTIPLICATION_OPERATOR)
-            return left_value * right_value;
-        if (node->type == DIVISION_OPERATOR)
-            return left_value / right_value;
-    }
-    return 0;
-}
 
-void traverse_and_print_ast(TreeNode *node, int depth)
-{
-    if (node == NULL)
-    {
-        return;
-    }
+//// Function to evaluate expression
+//int evaluate_expression(TreeNode *node)
+//{
+    //if (node->type == INTEGER_LITERAL)
+    //{
+        //return atoi(node->value);
+    //}
+    //else
+    //{
+        //int left_value = evaluate_expression(node->left);
+        //int right_value = evaluate_expression(node->right);
+        //if (node->type == PLUS_OPERATOR)
+            //return left_value + right_value;
+        //if (node->type == MINUS_OPERATOR)
+            //return left_value - right_value;
+        //if (node->type == MULTIPLICATION_OPERATOR)
+            //return left_value * right_value;
+        //if (node->type == DIVISION_OPERATOR)
+            //return left_value / right_value;
+    //}
+    //return 0;
+//}
 
-    // Indentation
-    for (int i = 0; i < depth; ++i)
-    {
+
+
+
+
+// Function to print the AST in a readable format
+void print_ast(TreeNode *root, int indent_level) {
+    if (root == NULL) return;
+    
+    // Indentation for readability
+    for (int i = 0; i < indent_level; ++i) {
         printf("  ");
     }
 
-    // Print the current node
-    printf("%s {", get_node_type_name(node->type));
+    // Print the current node's type name
+    const char *node_type_name = get_node_type_name(root->type);
+    printf("%s", node_type_name);
 
-    // Print left child and its next siblings
-    if (node->left != NULL)
-    {
-        printf("L->");
-        TreeNode *current = node->left;
-        while (current != NULL)
-        {
-            printf("%s", get_node_type_name(current->type));
-            current = current->next;
-            if (current != NULL)
-            {
-                printf("->");
-            }
-        }
+    // Print the node value if it exists
+    if (root->value != NULL) {
+        printf(" (Value: %s)", root->value);
     }
-
-    // Print right child
-    if (node->right != NULL)
-    {
-        printf(", R->%s", get_node_type_name(node->right->type));
-    }
-
-    printf("}");
-
-    // Print next sibling
-    if (node->next != NULL)
-    {
-        printf(" -> ");
-        printf("%s", get_node_type_name(node->next->type));
-    }
-
     printf("\n");
 
-    // Recursive traversal
-    traverse_and_print_ast(node->left, depth + 1);
-    traverse_and_print_ast(node->right, depth + 1);
-    traverse_and_print_ast(node->next, depth);
-}
-
-// void code_generation(TreeNode *node, CodeBuffer *buffer) {
-// if (node == NULL) return;
-
-// switch (node->type) {
-// case AST_VARIABLE_DECLARATION:
-//// Generate code for variable declaration
-// break;
-// case AST_ASSIGNMENT:
-//// Generate code for assignment
-// break;
-//// ... handle other node types
-//}
-
-//// Recursive calls
-// code_generation(node->left, buffer);
-// code_generation(node->right, buffer);
-// code_generation(node->next, buffer);
-//}
-
-void semantic_analysis(TreeNode *node, SymbolTable *table)
-{
-    if (node == NULL)
-        return;
-
-    switch (node->type)
-    {
-    case AST_INITIALIZATION:
-        printf("INITIALIZATION\n");
-        printf("PARTS: ");
-
-        TreeNode *currentNode = node->left;
-        while (currentNode != NULL)
-        {
-            printf("%s ", get_node_type_name(currentNode->type));
-            currentNode = currentNode->next;
-        }
-        printf("\n");
-        // Perform semantic checks and add to symbol table
-        break;
-    case AST_DECLARATION:
-        printf("DECLARATION\n");
-        break;
-    case AST_ASSIGNMENT:
-        printf("ASSIGNMENT\n");
-        // Perform semantic checks for assignment
-        break;
-    case AST_FUNCTION_CALL:
-        printf("FUNCTION CALL\n");
-        break;
-    case AST_BLOCK:
-        printf("BLOCK\n");
-        break;
-    case AST_LOOP:
-        printf("LOOP\n");
-        break;
-    case AST_CONDITIONAL:
-        printf("CONDITIONAL\n");
-        break;
-    case AST_FUNCTION_DEFINITION:
-        printf("FUNCTION DEFINITON\n");
-        break;
-    default:
-        break;
+    // Recursive DFS traversal for each child
+    for (size_t i = 0; i < root->children_count; ++i) {
+        print_ast(root->children[i], indent_level + 1);
     }
-
-    // Recursive calls
-    semantic_analysis(node->left, table);
-    semantic_analysis(node->right, table);
-    semantic_analysis(node->next, table);
 }
+
 
 int main()
 {
@@ -315,12 +220,13 @@ int main()
     TreeNode *program = parse_program(parser);
     free_parser(parser);
 
+    print_ast(program, 0);
     SymbolTable *table;
     // `buffer` is where we'll store the generated code.
     // CodeBuffer *buffer;
 
     // First traversal for semantic analysis
-    semantic_analysis(program, table);
+    //semantic_analysis(program, table);
 
     // Second traversal for code generation
     // code_generation(root, buffer);

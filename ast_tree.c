@@ -10,7 +10,7 @@ TreeNode* make_node(ASTNodeType type, char* value, int initial_child_capacity) {
     node->type = type;
     node->value = value;
     node->children = NULL;
-    node->children_count= 0;
+    node->children_count= initial_child_capacity;
 
     if (initial_child_capacity > 0) {
         node->children = (TreeNode**)malloc(initial_child_capacity * sizeof(TreeNode*));
