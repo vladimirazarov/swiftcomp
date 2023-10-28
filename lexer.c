@@ -848,6 +848,7 @@ Token get_token()
                     }
                 }
                 if (a == '"') {
+                    State = stringvalid;
                     break;
                 }
                 if (cflag != 1){
