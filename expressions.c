@@ -40,8 +40,8 @@ TreeNode* parse_expression(Parser *parser, Token token, int min_precedence)
 {
     //Allocate memory for ast
     TreeNode* expression_tree = (TreeNode*)malloc(sizeof(TreeNode));
-    expression_tree->left = NULL;
-    expression_tree->right = NULL;
+    expression_tree->children[0] = NULL;
+    expression_tree->children[1] = NULL;
 
     //Handle parenthesis
     if (parser->current_token.type == LEFT_PARENTHESIS) {
@@ -85,17 +85,17 @@ TreeNode* parse_expression(Parser *parser, Token token, int min_precedence)
         if(precedence >= min_precedence && precedence){
             //Handle unary operators
             if(parser->current_token.type == EXCLAMATION_MARK){
-                TreeNode* new_left = make_node(parser->current_token.type, parser->current_token.value);
+                TreeNode* new_left = make_node(parser->current_token.type, parser->current_token.value, 2);
                 advance_token(parser);
-                new_left->right = NULL;
-                new_left->left = expression_tree;
+                new_left->children[1] = NULL;
+                new_left->children[0] = expression_tree;
                 expression_tree = new_left;
             } else{
-                TreeNode* new_left = make_node(parser->current_token.type, parser->current_token.value);
+                TreeNode* new_left = make_node(parser->current_token.type, parser->current_token.value, 2);
                 advance_token(parser);
                 TreeNode* right = parse_expression(parser, parser->current_token, precedence + 1);
-                new_left->left = expression_tree;
-                new_left->right = right;
+                new_left->children[0] = expression_tree;
+                new_left->children[1] = right;
                 expression_tree = new_left;
             }
         } else {
