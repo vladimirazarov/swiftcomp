@@ -81,14 +81,13 @@ typedef enum {
 // Structure to represent AST
 typedef struct TreeNode {
     ASTNodeType type; // For ast
-    char* value;
-    struct TreeNode* left;
-    struct TreeNode* right;
-    struct TreeNode* next;  // For linked-list of arguments
+    char *value;
+    struct TreeNode **children; // Array for children nodes
+    size_t children_count; // Number of children in the array
 } TreeNode;
 
 // Function prototypes
-TreeNode* make_node(TokenType type, char* value);
-void free_leaf(TreeNode* leaf);
-void print_tree(TreeNode *root);
+TreeNode* make_node(ASTNodeType type, char* value, int initial_child_capacity);
+//void free_leaf(TreeNode* leaf);
+//void print_tree(TreeNode *root);
 #endif
