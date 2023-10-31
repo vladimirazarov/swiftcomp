@@ -91,3 +91,14 @@ if (parser->current_token.type == EXCLAMATION_MARK) {
     }
     return expression_tree;
 }
+
+// Function to check if a token can start an expression
+bool is_expression_start_token(Token token)
+{
+    // Include other token types that can start an expression
+    return (token.type == INTEGER_LITERAL) || 
+           (token.type == DOUBLE_LITERAL) || 
+           (token.type == STRING_LITERAL) || 
+           (token.type == IDENTIFIER && look_ahead(1).type != LEFT_PARENTHESIS)  ||
+           (token.type == IDENTIFIER && look_ahead(1).type != ASSIGNMENT_OPERATOR);
+}

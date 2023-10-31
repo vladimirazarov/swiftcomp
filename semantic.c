@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parser.h" // Assuming parser.h contains the definition of Parser and TreeNode
+#include "symbol_table.h"
 
 const char *get_node_type_name(int type)
 {
@@ -141,8 +142,6 @@ const char *get_node_type_name(int type)
         return "AST_ELSE_PART";
     case AST_BLOCK:
         return "AST_BLOCK";
-    case AST_TYPE:
-        return "AST_TYPE";
     case AST_PARAMETER_NAME:
         return "AST_PARAMETER_NAME";
     case AST_EXTERNAL_NAME:
@@ -155,45 +154,62 @@ const char *get_node_type_name(int type)
         return "AST_EXPRESSION";
     case AST_FUNCTION_CALL_IN_ASSIGNMENT:
         return "AST_FUNCTION_CALL_IN_ASSIGNMENT";
+    case EXCLAMATION_MARK:
+        return "EXCLAMATION MARK";
+    case AST_MORE_SECTIONS:
+        return "MORE SECTIONS";
     default:
         return "UNKNOWN";
     }
 }
 
+const char* tokenTypeToString(TokenType type) {
+    switch (type) {
+        case INTEGER_LITERAL:
+            return "int";
+        case STRING_LITERAL:
+        case MULTILINE_STRING:
+            return "string";
+        case DOUBLE_LITERAL:
+            return "double";
+        case NIL_LITERAL:
+            return "nil";
+        default:
+            return "unknown";
+    }
+}
 
-//// Function to evaluate expression
-//int evaluate_expression(TreeNode *node)
+// int evaluate_expression(TreeNode *node)
 //{
-    //if (node->type == INTEGER_LITERAL)
-    //{
-        //return atoi(node->value);
-    //}
-    //else
-    //{
-        //int left_value = evaluate_expression(node->left);
-        //int right_value = evaluate_expression(node->right);
-        //if (node->type == PLUS_OPERATOR)
-            //return left_value + right_value;
-        //if (node->type == MINUS_OPERATOR)
-            //return left_value - right_value;
-        //if (node->type == MULTIPLICATION_OPERATOR)
-            //return left_value * right_value;
-        //if (node->type == DIVISION_OPERATOR)
-            //return left_value / right_value;
-    //}
-    //return 0;
+// if (node->type == INTEGER_LITERAL)
+//{
+// return atoi(node->value);
+//}
+// else
+//{
+// int left_value = evaluate_expression(node->left);
+// int right_value = evaluate_expression(node->right);
+// if (node->type == PLUS_OPERATOR)
+// return left_value + right_value;
+// if (node->type == MINUS_OPERATOR)
+// return left_value - right_value;
+// if (node->type == MULTIPLICATION_OPERATOR)
+// return left_value * right_value;
+// if (node->type == DIVISION_OPERATOR)
+// return left_value / right_value;
+//}
+// return 0;
 //}
 
-
-
-
-
 // Function to print the AST in a readable format
-void print_ast(TreeNode *root, int indent_level) {
-    if (root == NULL) return;
-    
+void print_ast(TreeNode *root, int indent_level)
+{
+    if (root == NULL)
+        return;
+
     // Indentation for readability
-    for (int i = 0; i < indent_level; ++i) {
+    for (int i = 0; i < indent_level; ++i)
+    {
         printf("  ");
     }
 
@@ -202,17 +218,81 @@ void print_ast(TreeNode *root, int indent_level) {
     printf("%s", node_type_name);
 
     // Print the node value if it exists
-    if (root->value != NULL) {
+    if (root->value != NULL)
+    {
         printf(" (Value: %s)", root->value);
     }
     printf("\n");
 
     // Recursive DFS traversal for each child
-    for (size_t i = 0; i < root->children_count; ++i) {
+    for (size_t i = 0; i < root->children_count; ++i)
+    {
         print_ast(root->children[i], indent_level + 1);
     }
 }
 
+
+void semantic_analysis(TreeNode *root, SymbolTable *table)
+{
+    if (root == NULL)
+        return;
+
+    switch (root->type)
+    {
+    case AST_INITIALIZATION:
+    case AST_DECLARATION:
+    case AST_ASSIGNMENT:
+        // Implement assignment checks
+        break;
+    case AST_FUNCTION_CALL:
+        // Implement function call checks
+        break;
+    case AST_CONDITIONAL:
+        // Implement if statement checks
+        break;
+    case AST_RETURN_STATEMENT:
+        // Implement return statement checks
+        break;
+    case AST_ARGUMENTS:
+        // Implement arguments checks
+        break;
+    case AST_ARGUMENT:
+        // Implement argument checks
+        break;
+    case AST_FUNCTION_DEFINITION:
+        break;
+    case AST_PARAMETERS:
+        // Implement parameters checks
+        break;
+    case AST_PARAMETER:
+        // Implement single parameter checks
+        break;
+    case AST_IDENTIFIER:
+        // Implement identifier checks
+        break;
+    case AST_ELSE_PART:
+        // Implement else part checks
+        break;
+    case AST_BLOCK:
+        // Implement block checks
+        break;
+    case AST_LOOP:
+        break;
+    case AST_EXPRESSION:
+        // Implement expression checks
+        break;
+
+    default:
+        // Unknown node type
+        break;
+    }
+
+    // Recursive DFS traversal for each child
+    for (size_t i = 0; i < root->children_count; ++i)
+    {
+        semantic_analysis(root->children[i], table);
+    }
+}
 
 int main()
 {

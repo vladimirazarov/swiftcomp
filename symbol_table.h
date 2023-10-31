@@ -29,10 +29,6 @@ typedef struct Parameter {
 // Structure to hold information about a function
 typedef struct FunctionInfo {
     
-    size_t func_pos; //0 for built-in functions
-    size_t func_body;
-    size_t func_end;
-
     // Number of parameters
     int parameterCount;
     

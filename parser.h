@@ -30,7 +30,7 @@ TreeNode *parse_assignment_or_function_call(Parser* parser);
 TreeNode *parse_while_loop(Parser* parser);
 TreeNode *parse_if_cond(Parser* parser);
 TreeNode *parse_return_statement(Parser* parser);
-TreeNode *parse_function_call(Parser* parser, ASTNodeType);
+TreeNode *parse_function_call(Parser *parser, ASTNodeType nodeType, const char *identifier);
 TreeNode *parse_arguments(Parser *parser);
 TreeNode *parse_argument(Parser *parser);
 TreeNode *parse_literal_or_id(Parser *parser);
@@ -41,4 +41,6 @@ TreeNode *parse_more_parameters(Parser *parser);
 TreeNode *parse_expression_or_func_call(Parser *parser, ASTNodeType);
 TreeNode *get_expression_ast(Parser *parser, Token token);
 TreeNode *parse_more_sections(Parser *parser);
+Token look_ahead(int n);
+void init_token_buffer();
 #endif // PARSER_H

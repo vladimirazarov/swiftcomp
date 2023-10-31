@@ -9,4 +9,5 @@
 TreeNode* get_operand(Token token);
 TreeNode* parse_expression(Parser *parser, Token token, int min_precedence);
 int get_operator_precedence(TokenType token);
+bool is_expression_start_token(Token token);
 #endif
