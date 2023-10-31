@@ -207,7 +207,15 @@ TreeNode *parse_declaration_or_initialization(Parser *parser)
 {
     // Create the root node for this subtree
     TokenType keyword = parser->current_token.type; // VAR_KEYWORD or LET_KEYWORD
-    accept_token(parser, keyword);
+    TreeNode *keywordNode;
+    if (keyword == VAR_KEYWORD){
+        keywordNode = make_node(AST_VAR_KEYWORD, NULL, 0);
+        accept_token(parser, VAR_KEYWORD);
+    }
+    else if (keyword == LET_KEYWORD){
+        keywordNode = make_node(AST_LET_KEYWORD, NULL, 0);
+        accept_token(parser, LET_KEYWORD);
+    }
 
     TreeNode *root = NULL; // Will point to either a Declaration or Initialization node
 
@@ -231,8 +239,7 @@ TreeNode *parse_declaration_or_initialization(Parser *parser)
     if (parser->current_token.type == ASSIGNMENT_OPERATOR)
     {
         root = make_node(AST_INITIALIZATION, NULL, 0);  // Capacity for two children: Identifier and expression/function call
-
-        // Add identifier node as the first child
+        add_child(root, keywordNode);  
         add_child(root, idNode);
         if (typeNode !=NULL)
             add_child(root, typeNode);
@@ -241,19 +248,19 @@ TreeNode *parse_declaration_or_initialization(Parser *parser)
         // Parse the expression or function call
         TreeNode *expressionOrFunctionCallNode = parse_expression_or_func_call(parser, AST_FUNCTION_CALL_IN_ASSIGNMENT);
 
-        // Add the expression or function call node as the second child
         add_child(root, expressionOrFunctionCallNode);
         if(typeNode == NULL)
-            root->children_count = 2;  // Two children: Identifier and expression/function call
+            root->children_count = 3;  
         else
-            root->children_count = 3;
+            root->children_count = 4;
     }
     else
     {
-        root = make_node(AST_DECLARATION, NULL, 2); // ID, optional Type
-        root->children[0] = idNode;
-        root->children[1] = typeNode;
-        root->children_count = typeNode ? 2 : 1; // If typeNode exists, count is 2, otherwise 1
+        root = make_node(AST_DECLARATION, NULL, 3); // ID, optional Type
+        root->children[0] = keywordNode;
+        root->children[1] = idNode;
+        root->children[2] = typeNode;
+        root->children_count = typeNode ? 3 : 2; // If typeNode exists, count is 2, otherwise 1
     }
 
     return root;

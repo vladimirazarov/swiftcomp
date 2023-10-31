@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include "parser.h" // Assuming parser.h contains the definition of Parser and TreeNode
 #include "symbol_table.h"
+#include "sym_table_stack.h"
+#include <stdbool.h>
 
 const char *get_node_type_name(int type)
 {
@@ -163,19 +165,21 @@ const char *get_node_type_name(int type)
     }
 }
 
-const char* tokenTypeToString(TokenType type) {
-    switch (type) {
-        case INTEGER_LITERAL:
-            return "int";
-        case STRING_LITERAL:
-        case MULTILINE_STRING:
-            return "string";
-        case DOUBLE_LITERAL:
-            return "double";
-        case NIL_LITERAL:
-            return "nil";
-        default:
-            return "unknown";
+const char *tokenTypeToString(TokenType type)
+{
+    switch (type)
+    {
+    case INTEGER_LITERAL:
+        return "int";
+    case STRING_LITERAL:
+    case MULTILINE_STRING:
+        return "string";
+    case DOUBLE_LITERAL:
+        return "double";
+    case NIL_LITERAL:
+        return "nil";
+    default:
+        return "unknown";
     }
 }
 
@@ -231,16 +235,56 @@ void print_ast(TreeNode *root, int indent_level)
     }
 }
 
-
-void semantic_analysis(TreeNode *root, SymbolTable *table)
+void semantic_analysis(TreeNode *root, Context *context)
 {
     if (root == NULL)
         return;
 
     switch (root->type)
     {
+    
     case AST_INITIALIZATION:
+    {
+        Modifier modifier;
+        bool is_nullable = false;
+        EvaluatedExpressionData data;
+
+        // Evaluate the expression to get its type and value
+        // TODO: Uncomment the next line and implement evaluate_expression function
+        // data = evaluate_expression(root->children[2], context, 0);
+
+        // For demonstration, setting a dummy value
+        data.type = INT_SYMBOL_TYPE;
+        data.value.int_value = 2;
+
+        TreeNode *id = root->children[1];
+        if (root->children[0]->type == VAR_KEYWORD) {
+            modifier = VARIABLE;
+        } else if (root->children[0]->type == LET_KEYWORD) {
+            modifier = CONSTANT;
+        }
+
+        if (root->children_count == 3) {
+            is_nullable = false;
+        } else if (root->children_count == 4) {
+            if (root->children[2]->type == INT_NULLABLE_KEYWORD || 
+                root->children[2]->type == DOUBLE_NULLABLE_KEYWORD || 
+                root->children[2]->type == STRING_NULLABLE_KEYWORD) {
+                is_nullable = true;
+            }
+        }
+
+        // Check if the identifier is already declared in the current scope
+        if (find_symbol(context->sym_table_stack->top, id->value) != NULL) {
+            handle_error(SEMANTIC_UNDEF_ERROR);
+        } else {
+            insert_symbol(context->sym_table_stack->top, create_symbol(id->value, data, modifier, NULL, is_nullable));
+        }
+    }
+    break;
+
     case AST_DECLARATION:
+       // declareation 
     case AST_ASSIGNMENT:
         // Implement assignment checks
         break;
@@ -290,7 +334,7 @@ void semantic_analysis(TreeNode *root, SymbolTable *table)
     // Recursive DFS traversal for each child
     for (size_t i = 0; i < root->children_count; ++i)
     {
-        semantic_analysis(root->children[i], table);
+        semantic_analysis(root->children[i], context);
     }
 }
 
@@ -302,11 +346,16 @@ int main()
 
     print_ast(program, 0);
     SymbolTable *table;
-    // `buffer` is where we'll store the generated code.
-    // CodeBuffer *buffer;
+    table = init_symbol_table();
+    Stack *sym_table_stack;
+    sym_table_stack = init_stack();
+    sym_table_stack->top = table;
+    Context *context = (Context *) malloc(sizeof(Context));
+    context->sym_table_stack = sym_table_stack;
 
     // First traversal for semantic analysis
-    //semantic_analysis(program, table);
+    semantic_analysis(program, context);
+    print_symbol_table(context->sym_table_stack->top);
 
     // Second traversal for code generation
     // code_generation(root, buffer);

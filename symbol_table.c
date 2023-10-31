@@ -15,12 +15,61 @@
 #include "stdlib.h"
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-Symbol create_symbol(char *name, Token *data, Scope scope, Modifier modifier, FunctionInfo *functionInfo, bool isNullable) {
+void print_symbol_value(EvaluatedExpressionData data) {
+    switch (data.type) {
+        case STRING_SYMBOL_TYPE:
+            printf("String: %s\n", data.value.str_value);
+            break;
+        case INT_SYMBOL_TYPE:
+            printf("Integer: %d\n", data.value.int_value);
+            break;
+        case DOUBLE_SYMBOL_TYPE:
+            printf("Double: %lf\n", data.value.double_value);
+            break;
+        case BOOL_SYMBOL_TYPE:
+            printf("Boolean: %s\n", data.value.int_value ? "true" : "false");
+            break;
+        default:
+            printf("Unknown type\n");
+    }
+}
+
+void print_symbol(Symbol symbol) {
+    printf("Symbol Name: %s\n", symbol.name);
+    printf("Is Defined: %s\n", symbol.is_defined ? "true" : "false");
+    printf("Is Nullable: %s\n", symbol.isNullable ? "true" : "false");
+    printf("Modifier: %s\n", symbol.modifier == CONSTANT ? "Constant" : "Variable");
+    printf("Value: ");
+    print_symbol_value(symbol.type_and_value);
+    printf("\n");
+}
+
+void print_avl_node(AVLNode* node) {
+    if (node == NULL) {
+        return;
+    }
+
+    print_avl_node(node->left);
+    print_symbol(node->symbol);
+    print_avl_node(node->right);
+}
+
+void print_symbol_table(SymbolTable* table) {
+    if (table == NULL || table->root == NULL) {
+        printf("Symbol table is empty.\n");
+        return;
+    }
+
+    printf("Symbol Table:\n");
+    print_avl_node(table->root);
+    printf("\n");
+}
+
+Symbol create_symbol(char *name, EvaluatedExpressionData data, Modifier modifier, FunctionInfo *functionInfo, bool isNullable) {
     Symbol sym;
     sym.name = name;
-    sym.data = data;  
+    sym.type_and_value = data;  
     sym.is_defined = false; 
-    sym.scope = scope;
     sym.modifier = modifier;
     sym.functionInfo = functionInfo;
     sym.isNullable = false;
@@ -215,11 +264,12 @@ void delete_symbol(SymbolTable* table, char* name) {
     table->root = delete_node(table->root, name);
 }
 
-void update_symbol_value(SymbolTable *table, char *name, void *newValue) {
+void update_symbol_value(SymbolTable *table, char *name, SymbolValueU new_value) {
     AVLNode *node = search(table->root, name);
     
     if (node) {
-        node->symbol.data->value = newValue;
+        //TODO: a lot of stuff...
+        node->symbol.type_and_value.value = new_value;
     } else {
         // TODO: err
     }
