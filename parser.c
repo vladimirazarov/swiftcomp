@@ -261,6 +261,9 @@ TreeNode *parse_declaration_or_initialization(Parser *parser)
         root->children[1] = idNode;
         root->children[2] = typeNode;
         root->children_count = typeNode ? 3 : 2; // If typeNode exists, count is 2, otherwise 1
+        // No type and value will cause syntactic error
+        if (typeNode == NULL) 
+            handle_error(SYNTACTIC_ERROR);
     }
 
     return root;

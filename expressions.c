@@ -3,6 +3,7 @@
 #include "parser.h"
 #include "lexer.h"
 #include "ast_tree.h"
+#include "semantic.h"
 
 //Function to compare precedence of operators
 int get_operator_precedence(TokenType token) {
@@ -26,7 +27,8 @@ TreeNode* get_operand(Token token) {
     if(token.type == IDENTIFIER || 
         token.type == INTEGER_LITERAL || 
         token.type == DOUBLE_LITERAL || 
-        token.type == STRING_LITERAL) {
+        token.type == STRING_LITERAL || 
+        token.type == NIL_LITERAL ) {
         return left;
     }
     handle_error(SYNTACTIC_ERROR);
@@ -101,4 +103,130 @@ bool is_expression_start_token(Token token)
            (token.type == STRING_LITERAL) || 
            (token.type == IDENTIFIER && look_ahead(1).type != LEFT_PARENTHESIS)  ||
            (token.type == IDENTIFIER && look_ahead(1).type != ASSIGNMENT_OPERATOR);
+}
+
+EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bool must_be_truth_value) {
+    EvaluatedExpressionData data;
+    if (node == NULL) {
+        data.type = EMPTY;
+        return data;
+    }
+
+    // Base cases for literals
+    if (node->type == INTEGER_LITERAL) {
+        data.value.int_value = atoi(node->value);
+        data.type = INT_SYMBOL_TYPE;
+        return data;
+    } else if (node->type == DOUBLE_LITERAL) {
+        data.value.double_value = atof(node->value);
+        data.type = DOUBLE_SYMBOL_TYPE;
+        return data;
+    } else if (node->type == STRING_LITERAL) {
+        // Assuming string handling is correctly implemented elsewhere
+        data.value.str_value = strdup(node->value);
+        data.type = STRING_SYMBOL_TYPE;
+        return data;
+    }
+    else if (node->type == NIL_LITERAL) {
+        data.type = NIL_SYMBOL_TYPE;
+        return data;
+    }
+    else if (node->type ==  AST_IDENTIFIER) {
+        Symbol *symbol = find_symbol(context->sym_table_stack->top, node->value); 
+        if (symbol == NULL)
+            handle_error(SEMANTIC_UNDEF_ERROR);
+        data = symbol->type_and_value;
+        return data;
+    }
+
+    // Recursive evaluation of children
+    EvaluatedExpressionData left_eval = evaluate_expression(node->children[0], context, must_be_truth_value);
+    EvaluatedExpressionData right_eval = evaluate_expression(node->children[1], context, must_be_truth_value);
+
+    if (right_eval.type != EMPTY && left_eval.type != EMPTY)
+    {
+    // Perform operation according to the type of the node
+    switch(node->type) {
+        case PLUS_OPERATOR:
+            // Addition for integers, doubles, and strings (concatenation)
+            if (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE) {
+                data.value.int_value = left_eval.value.int_value + right_eval.value.int_value;
+                data.type = INT_SYMBOL_TYPE;
+            } else if (left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE) {
+                data.value.double_value = left_eval.value.double_value + right_eval.value.double_value;
+                data.type = DOUBLE_SYMBOL_TYPE;
+            } else if (left_eval.type == STRING_SYMBOL_TYPE && right_eval.type == STRING_SYMBOL_TYPE) {
+                // String concatenation logic here
+            } else {
+                // Handle type incompatibility error
+            }
+            break;
+        case MINUS_OPERATOR:
+            // Subtraction for integers and doubles
+            if (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE) {
+                data.value.int_value = left_eval.value.int_value - right_eval.value.int_value;
+                data.type = INT_SYMBOL_TYPE;
+            } else if (left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE) {
+                data.value.double_value = left_eval.value.double_value - right_eval.value.double_value;
+                data.type = DOUBLE_SYMBOL_TYPE;
+            } else {
+                // Handle type incompatibility error
+            }
+            break;
+        case MULTIPLICATION_OPERATOR:
+            // Multiplication for integers and doubles
+            if (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE) {
+                data.value.int_value = left_eval.value.int_value * right_eval.value.int_value;
+                data.type = INT_SYMBOL_TYPE;
+            } else if (left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE) {
+                data.value.double_value = left_eval.value.double_value * right_eval.value.double_value;
+                data.type = DOUBLE_SYMBOL_TYPE;
+            } else {
+                // Handle type incompatibility error
+            }
+            break;
+        case DIVISION_OPERATOR:
+            // Division for integers and doubles, handle division by zero
+            if (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE) {
+                if (right_eval.value.int_value == 0) {
+                    // Handle division by zero error
+                } else {
+                    data.value.int_value = left_eval.value.int_value / right_eval.value.int_value;
+                    data.type = INT_SYMBOL_TYPE;
+                }
+            } else if (left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE) {
+                if (right_eval.value.double_value == 0.0) {
+                    // Handle division by zero error
+                } else {
+                    data.value.double_value = left_eval.value.double_value / right_eval.value.double_value;
+                    data.type = DOUBLE_SYMBOL_TYPE;
+                }
+            } else {
+                // Handle type incompatibility error
+            }
+            break;
+        // ... Implement logic for additional operators, including relational and ?? operator
+        // Make sure to handle must_be_truth_value where necessary
+        default:
+            // Handle unknown or unsupported node type error
+            break;
+            //Implement the logic for string concatenation.
+            //Implement the logic for the ?? operator and the unary ! operator.
+            //Add cases for relational operators and ensure type compatibility.
+            //Handle division by zero and other potential errors.
+            //Perform implicit type conversions where necessary, as per the requirements.
+            //Handle the must_be_truth_value flag to ensure the expression is valid in a truth context when required.
+            //Add proper error handling for semantic errors.
+    }
+    return data;
+    }
+
+    // Here we need to check if the expression should evaluate to a truth value and handle it accordingly
+    if (must_be_truth_value && data.type != BOOL_SYMBOL_TYPE) {
+        // Handle the error that the result is not a truth value when it is expected to be
+    }
+    if (right_eval.type == EMPTY && left_eval.type != EMPTY)
+        return left_eval;
+    if (right_eval.type != EMPTY && left_eval.type == EMPTY)
+        return right_eval;
 }

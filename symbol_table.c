@@ -10,9 +10,11 @@
  */
 
 #include "stdio.h"
-#include "symbol_table.h"
 #include "string.h"
 #include "stdlib.h"
+#include "expressions.h"
+#include "symbol_table.h"
+
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
 void print_symbol_value(EvaluatedExpressionData data) {
@@ -27,20 +29,66 @@ void print_symbol_value(EvaluatedExpressionData data) {
             printf("Double: %lf\n", data.value.double_value);
             break;
         case BOOL_SYMBOL_TYPE:
-            printf("Boolean: %s\n", data.value.int_value ? "true" : "false");
+            printf("Boolean: %s\n", data.value.bool_value ? "true" : "false");
+            break;
+        case NIL_SYMBOL_TYPE:
+            printf("Nil\n");
             break;
         default:
             printf("Unknown type\n");
     }
 }
 
+
+// Helper function to print parameter types as strings
+const char* get_type_name(ValueType type) {
+    switch (type) {
+        case STRING_SYMBOL_TYPE: return "String";
+        case INT_SYMBOL_TYPE: return "Integer";
+        case DOUBLE_SYMBOL_TYPE: return "Double";
+        case BOOL_SYMBOL_TYPE: return "Boolean";
+        case NIL_SYMBOL_TYPE: return "Nil";
+        case FUNCTION_SYMBOL_TYPE: return "Function";
+        default: return "Unknown";
+    }
+}
+
+// Function to print a single parameter
+void print_parameter(const Parameter* param) {
+    printf("Parameter Name: %s, Parameter Identifier: %s, Type: %s, Nullable: %s\n",
+           param->name ? param->name : "NONE",
+           param->identifier,
+           get_type_name(param->type),
+           param->is_nullable ? "true" : "false");
+}
+
+// Function to print the information of a function
+void print_function_info(const FunctionInfo* info) {
+    printf("Function Return Type: %s\n", get_type_name(info->returnType));
+    printf("Function Parameter Count: %d\n", info->parameterCount);
+    Parameter *curParam = info->parameters;
+    while(curParam != NULL)
+    {
+        print_parameter(curParam);
+        curParam = curParam->next;
+    }
+}
+
+// Updated print_symbol function
 void print_symbol(Symbol symbol) {
     printf("Symbol Name: %s\n", symbol.name);
-    printf("Is Defined: %s\n", symbol.is_defined ? "true" : "false");
+    printf("Is Initialized: %s\n", symbol.is_initialized ? "true" : "false");
     printf("Is Nullable: %s\n", symbol.isNullable ? "true" : "false");
     printf("Modifier: %s\n", symbol.modifier == CONSTANT ? "Constant" : "Variable");
-    printf("Value: ");
-    print_symbol_value(symbol.type_and_value);
+    
+    if (symbol.functionInfo != NULL) {
+        // This symbol is a function, print its information
+        print_function_info(symbol.functionInfo);
+    } else {
+        // This symbol is not a function, print its value normally
+        printf("Value: ");
+        print_symbol_value(symbol.type_and_value);
+    }
     printf("\n");
 }
 
@@ -65,14 +113,14 @@ void print_symbol_table(SymbolTable* table) {
     printf("\n");
 }
 
-Symbol create_symbol(char *name, EvaluatedExpressionData data, Modifier modifier, FunctionInfo *functionInfo, bool isNullable) {
-    Symbol sym;
-    sym.name = name;
+Symbol create_symbol(char *name, EvaluatedExpressionData data, bool is_initialized, Modifier modifier, FunctionInfo *functionInfo, bool is_nullable) {
+    Symbol sym = {0};
+    sym.name = strdup(name);
     sym.type_and_value = data;  
-    sym.is_defined = false; 
+    sym.is_initialized = is_initialized; 
     sym.modifier = modifier;
     sym.functionInfo = functionInfo;
-    sym.isNullable = false;
+    sym.isNullable = is_nullable;
     return sym;
 }
 
@@ -254,11 +302,20 @@ void insert_symbol(SymbolTable* table, Symbol symbol) {
     table->root = insert_node(table->root, symbol.name, symbol);
 }
 
-Symbol* find_symbol(SymbolTable* table, char* name) {
-    if (!table) return NULL;
-    return search(table->root, name);
+// Recursive function to search through each SymbolTable in the stack
+Symbol* find_in_table(SymStackNode *node, char* name) {
+    if (!node) return NULL; // Reached the bottom of the stack
+
+    Symbol* symbol = search(node->table->root, name);
+    if (symbol) return symbol; // Found the symbol in the current table
+
+    return find_in_table(node->next, name); // Recursively search in the next table
 }
 
+Symbol* find_symbol(Stack *stack, char* name) {
+    if (!stack) return NULL;
+    return find_in_table(stack->top, name);
+}
 void delete_symbol(SymbolTable* table, char* name) {
     if (!table) return;
     table->root = delete_node(table->root, name);

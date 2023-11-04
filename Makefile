@@ -15,9 +15,6 @@ $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ)
 
 # Compile source files into object files
-sym_table_stack.o: sym_table_stack.c sym_table_stack.h
-	$(CC) $(CFLAGS) -c sym_table_stack.c
-
 semantic.o: semantic.c semantic.h
 	$(CC) $(CFLAGS) -c semantic.c
 
@@ -29,6 +26,9 @@ lexer.o: lexer.c lexer.h
 
 symbol_table.o: symbol_table.c symbol_table.h
 	$(CC) $(CFLAGS) -c symbol_table.c
+
+sym_table_stack.o: sym_table_stack.c symbol_table.h
+	$(CC) $(CFLAGS) -c sym_table_stack.c
 
 ast_tree.o: ast_tree.c ast_tree.h
 	$(CC) $(CFLAGS) -c ast_tree.c
