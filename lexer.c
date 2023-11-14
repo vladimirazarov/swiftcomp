@@ -811,9 +811,9 @@ Token get_token()
                                         }
                                     
                                 } 
-                                else if (a == '"') { //open
+                                else if (a == '"') {
                                     size_t len = strlen(str);
-                                    char *str2 = malloc(len + 1 + 4);
+                                    char *str2 = malloc(len + 1 + 3);
                                     strcpy(str2, str);
                                     if(i>0){
                                         free(str);
@@ -821,12 +821,164 @@ Token get_token()
                                     str2[len] = 92;
                                     str2[len + 1] = 'u';
                                     str2[len + 2] = '{';
-                                    str2[len + 3] = '}';
-                                    str2[len + 4] = '\0';
+                                    str2[len + 3] = '\0';
                                     str = str2;
                                     i++;
+                                    switch (z) {                //switch>loop
 
-                                    break;
+                                        case 1:
+                                            len = strlen(str);
+                                            str2 = malloc(len + 1 + 2);
+                                            strcpy(str2, str);
+                                            if (i>0){
+                                                free(str);
+                                            }
+                                            str2[len] = arr[0];
+                                            str2[len + 1] = a;
+                                            str2[len + 2] = '\0';
+                                            str = str2;
+                                            i++;
+                                            cflag = 1;
+                                            break;
+
+                                            case 2:
+                                                len = strlen(str);
+                                                str2 = malloc(len + 1 + 3);
+                                                strcpy(str2, str);
+                                                if (i>0){
+                                                    free(str);
+                                                }
+                                                str2[len] = arr[0];
+                                                str2[len + 1] = arr[1];
+                                                str2[len + 2] = a;
+                                                str2[len + 3] = '\0';
+                                                str = str2;
+                                                i++;
+                                                cflag = 1;
+                                                break;
+
+                                            case 3:
+                                                len = strlen(str);
+                                                str2 = malloc(len + 1 + 4);
+                                                strcpy(str2, str);
+                                                if (i>0){
+                                                    free(str);
+                                                }
+                                                str2[len] = arr[0];
+                                                str2[len + 1] = arr[1];
+                                                str2[len + 2] = arr[2];
+                                                str2[len + 3] = a;
+                                                str2[len + 4] = '\0';
+                                                str = str2;
+                                                i++;
+                                                cflag = 1;
+                                                break;
+
+                                            case 4:
+                                                len = strlen(str);
+                                                str2 = malloc(len + 1 + 5);
+                                                strcpy(str2, str);
+                                                if (i>0){
+                                                    free(str);
+                                                }
+                                                str2[len] = arr[0];
+                                                str2[len + 1] = arr[1];
+                                                str2[len + 2] = arr[2];
+                                                str2[len + 3] = arr[3];
+                                                str2[len + 4] = a;
+                                                str2[len + 5] = '\0';
+                                                str = str2;
+                                                i++;
+                                                cflag = 1;
+                                                break;
+
+                                            case 5:
+                                                len = strlen(str);
+                                                str2 = malloc(len + 1 + 6);
+                                                strcpy(str2, str);
+                                                if (i>0){
+                                                    free(str);
+                                                }
+                                                str2[len] = arr[0];
+                                                str2[len + 1] = arr[1];
+                                                str2[len + 2] = arr[2];
+                                                str2[len + 3] = arr[3];
+                                                str2[len + 4] = arr[4];
+                                                str2[len + 5] = a;
+                                                str2[len + 6] = '\0';
+                                                str = str2;
+                                                i++;
+                                                cflag = 1;
+                                                break;
+
+                                            case 6:
+                                                len = strlen(str);
+                                                str2 = malloc(len + 1 + 7);
+                                                strcpy(str2, str);
+                                                if (i>0){
+                                                    free(str);
+                                                }
+                                                str2[len] = arr[0];
+                                                str2[len + 1] = arr[1];
+                                                str2[len + 2] = arr[2];
+                                                str2[len + 3] = arr[3];
+                                                str2[len + 4] = arr[4];
+                                                str2[len + 5] = arr[5];
+                                                str2[len + 6] = a;
+                                                str2[len + 7] = '\0';
+                                                str = str2;
+                                                i++;
+                                                cflag = 1;
+                                                break;
+
+                                            case 7:
+                                                len = strlen(str);
+                                                str2 = malloc(len + 1 + 8);
+                                                strcpy(str2, str);
+                                                if (i>0){
+                                                    free(str);
+                                                }
+                                                str2[len] = arr[0];
+                                                str2[len + 1] = arr[1];
+                                                str2[len + 2] = arr[2];
+                                                str2[len + 3] = arr[3];
+                                                str2[len + 4] = arr[4];
+                                                str2[len + 5] = arr[5];
+                                                str2[len + 6] = arr[6];
+                                                str2[len + 7] = a;
+                                                str2[len + 8] = '\0';
+                                                str = str2;
+                                                i++;
+                                                cflag = 1;
+                                                break;
+
+                                            case 8:
+                                                len = strlen(str);
+                                                str2 = malloc(len + 1 + 9);
+                                                strcpy(str2, str);
+                                                if (i>0){
+                                                    free(str);
+                                                }
+                                                str2[len] = arr[0];
+                                                str2[len + 1] = arr[1];
+                                                str2[len + 2] = arr[2];
+                                                str2[len + 3] = arr[3];
+                                                str2[len + 4] = arr[4];
+                                                str2[len + 5] = arr[5];
+                                                str2[len + 6] = arr[6];
+                                                str2[len + 7] = arr[7];
+                                                str2[len + 8] = a;
+                                                str2[len + 9] = '\0';
+                                                str = str2;
+                                                i++;
+                                                cflag = 1;
+                                                break;
+
+                                            
+                                    }
+                                    if (cflag == 1){
+                                        break;
+                                    }
 
                                 }
                             }
