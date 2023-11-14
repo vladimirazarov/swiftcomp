@@ -1,5 +1,3 @@
-// TODO:      3. Implementace pravidel
-// TODO:      Popremyslet o tom ze nemuzue definovat funkci pokud jsme jiz uvnitr funkce (semantika/syntax?)
 
 // PROMENNE
 // Vstupni bod = Neoznačená nesouvislá sekvence příkazů, to znamena hlavni telo programu (treba jako v pythonu)
@@ -35,7 +33,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-bool is_return_value;
+#define N 3  // The number of tokens to look ahead
+
+bool is_return_value = false;
+
+Token token_buffer[N];
 
 // Function to create a new parser
 Parser *create_parser()
@@ -45,8 +47,29 @@ Parser *create_parser()
     {
         handle_error(INTERNAL_ERROR);
     }
-    parser->current_token = get_token();
+    init_token_buffer();
+    parser->current_token = token_buffer[0];
     return parser;
+}
+// Function to initialize the token buffer
+void init_token_buffer()
+{
+    for (int i = 0; i < N; ++i)
+    {
+        token_buffer[i] = get_token();
+    }
+}
+
+// Function to look ahead n tokens
+Token look_ahead(int n)
+{
+    if (n < N)
+    {
+        return token_buffer[n];
+    }
+    // Handle error if look-ahead too far
+    handle_error(INTERNAL_ERROR);
+    return token_buffer[0]; // Dummy return to make the compiler happy
 }
 
 // Function to destroy a parser
@@ -70,165 +93,186 @@ void accept_token(Parser *parser, TokenType expected_type)
     }
 }
 
+// Function to advance to the next token
 void advance_token(Parser *parser)
 {
-    // This function should update parser->current_token to the next token in the stream
-    parser->current_token = get_token();
+    // Pop the front of the buffer and push a new token onto the end
+    for (int i = 1; i < N; ++i)
+    {
+        token_buffer[i - 1] = token_buffer[i];
+    }
+    token_buffer[N - 1] = get_token();
+    // Update the current token
+    parser->current_token = token_buffer[0];
 }
 
-
 // Function to parse a program
-TreeNode *parse_program(Parser *parser)
-{
-    // Create the root node for the AST
-    TreeNode* root = make_node(AST_PROGRAM, NULL);
+TreeNode *parse_program(Parser *parser) {
+    TreeNode *root = make_node(AST_PROGRAM, NULL, 2);
+    
+    if (parser->current_token.type != END_OF_FILE) {
+        TreeNode *sectionNode = parse_section(parser);
+        TreeNode *moreSectionsNode = parse_more_sections(parser);  // Function to parse additional sections
 
-    if (parser->current_token.type != END_OF_FILE)
-    {
-        // Parse the section and attach it to the root
-        TreeNode* sectionNode = parse_section(parser);
-        root->left = sectionNode;  // 'left' is used for the main child
-
-        if (parser->current_token.type != END_OF_FILE)
-        {
-            // If not EOF after parsing section, it's a syntax error
-            handle_error(SYNTACTIC_ERROR);
-        }
-    }
-    else
-    {
-        // If EOF at the beginning, it's a syntax error
+        root->children[0] = sectionNode;
+        root->children[1] = moreSectionsNode;
+    } else {
         handle_error(SYNTACTIC_ERROR);
     }
     return root;
 }
 
-TreeNode* parse_section(Parser *parser) {
-    // Create a new AST node for this section
-    TreeNode* sectionNode = make_node(AST_SECTION, NULL);
+// Function to parse a section
+TreeNode *parse_section(Parser *parser) {
+    TreeNode *sectionNode = make_node(AST_SECTION, NULL, 2);
+    
+    TreeNode *statementsNode = parse_statements(parser);
+    TreeNode *functionDefinitionsNode = parse_function_definitions(parser);
 
-    // Parse statements and attach them to this section node
-    TreeNode* statementsNode = parse_statements(parser);
-    sectionNode->left = statementsNode;
-
-    // Parse function definitions and attach them to this section node
-    TreeNode* functionDefinitionsNode = parse_function_definitions(parser);
-    sectionNode->right = functionDefinitionsNode;
-
-    // If there are more sections, recursively parse them
-    if (parser->current_token.type != END_OF_FILE) {
-        TreeNode* nextSectionNode = parse_section(parser);
-        sectionNode->next = nextSectionNode;
-    }
-
+    sectionNode->children[0] = statementsNode;
+    sectionNode->children[1] = functionDefinitionsNode;
+    
     return sectionNode;
 }
 
+// Function to parse additional sections
+TreeNode *parse_more_sections(Parser *parser) {
+    // If we've reached the end of the file, return NULL as there are no more sections
+    if (parser->current_token.type == END_OF_FILE) {
+        return NULL;
+    }
+    
+    // Create a new AST node for this additional section
+    TreeNode *moreSectionsNode = make_node(AST_MORE_SECTIONS, NULL, 2);
+
+    // Parse the next section
+    TreeNode *sectionNode = parse_section(parser);
+    moreSectionsNode->children[0] = sectionNode;
+
+    // Recursively parse even more sections, if any
+    TreeNode *furtherSectionsNode = parse_more_sections(parser);
+    moreSectionsNode->children[1] = furtherSectionsNode;
+
+    return moreSectionsNode;
+}
+
 // Function to parse statements
-TreeNode* parse_statements(Parser *parser)
-{
-    TreeNode* head = NULL; // The first statement node
-    TreeNode* tail = NULL; // The last statement node
+TreeNode* parse_statements(Parser *parser) {
+    // Create a new AST node for AST_STATEMENTS
+    TreeNode *statementsNode = make_node(AST_STATEMENTS, NULL, 0);
+    
+    // Initialize the children_count to 0, the add_child function will handle dynamic resizing
+    statementsNode->children_count = 0;
 
     while (parser->current_token.type != END_OF_FILE &&
-           parser->current_token.type != FUNCTION_KEYWORD)
-    {
-        TreeNode* stmtNode = NULL; // The current statement node
+           parser->current_token.type != FUNCTION_KEYWORD) {
+        TreeNode *stmtNode = NULL; // The current statement node
 
-        switch (parser->current_token.type)
-        {
-        case VAR_KEYWORD:
-        case LET_KEYWORD:
-            stmtNode = parse_declaration_or_initialization(parser);
-            break;
-        case IDENTIFIER:
-            stmtNode = parse_assignment_or_function_call(parser);
-            break;
-        case RETURN_KEYWORD:
-            stmtNode = parse_return_statement(parser);
-            break;
-        case WHILE_KEYWORD:
-            stmtNode = parse_while_loop(parser);
-            break;
-        case IF_KEYWORD:
-            stmtNode = parse_if_cond(parser);
-            break;
-        case LEFT_CURLY_BRACE:
-            stmtNode = parse_block(parser);
-            break;
-        case RIGHT_CURLY_BRACE:
-            // End of block, return the linked list of statements
-            return head;
-        default:
-            handle_error(SYNTACTIC_ERROR);
-            return NULL;
+        switch (parser->current_token.type) {
+            case VAR_KEYWORD:
+            case LET_KEYWORD:
+                stmtNode = parse_declaration_or_initialization(parser);
+                break;
+            case IDENTIFIER:
+                stmtNode = parse_assignment_or_function_call(parser);
+                break;
+            case RETURN_KEYWORD:
+                stmtNode = parse_return_statement(parser);
+                break;
+            case WHILE_KEYWORD:
+                stmtNode = parse_while_loop(parser);
+                break;
+            case IF_KEYWORD:
+                stmtNode = parse_if_cond(parser);
+                break;
+            case LEFT_CURLY_BRACE:
+                stmtNode = parse_block(parser);
+                break;
+            case RIGHT_CURLY_BRACE:
+                // End of block; return the AST_STATEMENTS node
+                return statementsNode;
+            default:
+                handle_error(SYNTACTIC_ERROR);
+                return NULL;
         }
 
-        // Add the statement node to the linked list
-        if (head == NULL) {
-            head = stmtNode;
-            tail = stmtNode;
-        } else {
-            tail->next = stmtNode;
-            tail = stmtNode;
-        }
+        // Add the statement node to AST_STATEMENTS children array
+        add_child(statementsNode, stmtNode);
     }
-
-    return head;
+    
+    return statementsNode;
 }
 
-TreeNode* parse_declaration_or_initialization(Parser *parser)
+TreeNode *parse_declaration_or_initialization(Parser *parser)
 {
-    TokenType keyword = parser->current_token.type; // Store the keyword (either VAR_KEYWORD or LET_KEYWORD)
-    accept_token(parser, keyword); // Accept 'var' or 'let'
+    // Create the root node for this subtree
+    TokenType keyword = parser->current_token.type; // VAR_KEYWORD or LET_KEYWORD
+    TreeNode *keywordNode;
+    if (keyword == VAR_KEYWORD){
+        keywordNode = make_node(AST_VAR_KEYWORD, NULL, 0);
+        accept_token(parser, VAR_KEYWORD);
+    }
+    else if (keyword == LET_KEYWORD){
+        keywordNode = make_node(AST_LET_KEYWORD, NULL, 0);
+        accept_token(parser, LET_KEYWORD);
+    }
 
-    // Accept the identifier and store its value
-    char* idValue = parser->current_token.value;
-    accept_token(parser, IDENTIFIER); // Accept the identifier
+    TreeNode *root = NULL; // Will point to either a Declaration or Initialization node
 
-    TreeNode *typeNode = NULL;
-    TreeNode *exprFuncCallNode = NULL;
+    // Accept the identifier and create its node
+    char *idValue = parser->current_token.value;
+    TreeNode *idNode = make_node(AST_IDENTIFIER, idValue, 0);
+
+    // Save current token before advancing
+    Token savedToken = parser->current_token;  
+    accept_token(parser, IDENTIFIER);
 
     // Check for optional type
+    TreeNode *typeNode = NULL;
     if (parser->current_token.type == COLON)
     {
-        accept_token(parser, COLON); // Accept ':'
-        typeNode = parse_type(parser); // Parse the type and get its node
+        accept_token(parser, COLON);
+        typeNode = parse_type(parser);
     }
 
-    // Check for optional expression or function call
+    // Check for optional assignment (to distinguish between declaration and initialization)
     if (parser->current_token.type == ASSIGNMENT_OPERATOR)
     {
+        root = make_node(AST_INITIALIZATION, NULL, 0);  // Capacity for two children: Identifier and expression/function call
+        add_child(root, keywordNode);  
+        add_child(root, idNode);
+        if (typeNode !=NULL)
+            add_child(root, typeNode);
         accept_token(parser, ASSIGNMENT_OPERATOR); // Accept '='
-        exprFuncCallNode = parse_expression_or_func_call(parser); // Parse the expression or function call and get its node
+
+        // Parse the expression or function call
+        TreeNode *expressionOrFunctionCallNode = parse_expression_or_func_call(parser, AST_FUNCTION_CALL_IN_ASSIGNMENT);
+
+        add_child(root, expressionOrFunctionCallNode);
+        if(typeNode == NULL)
+            root->children_count = 3;  
+        else
+            root->children_count = 4;
+    }
+    else
+    {
+        root = make_node(AST_DECLARATION, NULL, 3); // ID, optional Type
+        root->children[0] = keywordNode;
+        root->children[1] = idNode;
+        root->children[2] = typeNode;
+        root->children_count = typeNode ? 3 : 2; // If typeNode exists, count is 2, otherwise 1
+        // No type and value will cause syntactic error
+        if (typeNode == NULL) 
+            handle_error(SYNTACTIC_ERROR);
     }
 
-    // Determine the type of the node (Declaration or Initialization)
-    ASTNodeType nodeType = (exprFuncCallNode != NULL) ? AST_INITIALIZATION : AST_DECLARATION;
-
-    // Create the appropriate AST node
-    TreeNode* declInitNode = make_node(nodeType, NULL);
-    TreeNode* keywordNode = make_node(keyword, NULL);
-    TreeNode* idNode = make_node(IDENTIFIER, idValue);
-
-    // Link them together
-    declInitNode->left = keywordNode;
-    keywordNode->next = idNode;
-    idNode->next = typeNode;
-    if (typeNode) {
-        typeNode->next = exprFuncCallNode;
-    } else {
-        idNode->next = exprFuncCallNode;
-    }
-
-    return declInitNode; // Return the root of this subtree
+    return root;
 }
 
-
 // Function to parse expression or function call
-TreeNode* parse_expression_or_func_call(Parser *parser)
+TreeNode *parse_expression_or_func_call(Parser *parser, ASTNodeType nodeType)
 {
-    TreeNode* exprFuncCallNode = NULL;
+    TreeNode *exprFuncCallNode = NULL;
 
     if (parser->current_token.type == IDENTIFIER)
     {
@@ -237,7 +281,8 @@ TreeNode* parse_expression_or_func_call(Parser *parser)
 
         if (parser->current_token.type == LEFT_PARENTHESIS)
         {
-            exprFuncCallNode = parse_function_call(parser);
+            // Pass the identifier value when parsing a function call
+            exprFuncCallNode = parse_function_call(parser, nodeType, save_token.value);
         }
         else
         {
@@ -252,28 +297,28 @@ TreeNode* parse_expression_or_func_call(Parser *parser)
     return exprFuncCallNode;
 }
 
-// Function to parse function call
-TreeNode* parse_function_call(Parser *parser)
+TreeNode *parse_function_call(Parser *parser, ASTNodeType nodeType, const char *identifier)
 {
     // Create a new AST node for this function call
-    TreeNode* functionCallNode = make_node(AST_FUNCTION_CALL, NULL);
+    TreeNode *functionCallNode = make_node(nodeType, identifier, 0); // Now using the identifier
 
-    accept_token(parser, LEFT_PARENTHESIS);  // Accept '('
+    accept_token(parser, LEFT_PARENTHESIS); // Accept '('
 
     // Parse the arguments and attach them to this function call node
-    TreeNode* argumentsNode = parse_arguments(parser);
-    functionCallNode->left = argumentsNode;
+    TreeNode *argumentsNode = parse_arguments(parser);
+
+    // Add argumentsNode to the children of functionCallNode
+    add_child(functionCallNode, argumentsNode);
 
     accept_token(parser, RIGHT_PARENTHESIS); // Accept ')'
 
     return functionCallNode;
 }
 
-// Function to parse assignment or function call
-TreeNode* parse_assignment_or_function_call(Parser *parser)
+TreeNode *parse_assignment_or_function_call(Parser *parser)
 {
     // Create a new AST node for this assignment or function call
-    TreeNode* assignmentOrFunctionCallNode = NULL;
+    TreeNode *assignmentOrFunctionCallNode = NULL;
 
     // Save the identifier for later use
     Token identifierToken = parser->current_token;
@@ -282,26 +327,32 @@ TreeNode* parse_assignment_or_function_call(Parser *parser)
     // Check if it's an assignment or a function call
     if (parser->current_token.type == ASSIGNMENT_OPERATOR)
     {
-        // It's an assignment, can be an expression or a function call
-        assignmentOrFunctionCallNode = make_node(AST_ASSIGNMENT, NULL); // No value for the assignment node itself
-        TreeNode* idNode = make_node(IDENTIFIER, identifierToken.value); // Create an identifier node with the value
-        assignmentOrFunctionCallNode->left = idNode; // Attach the identifier node as the left child
+        // It's an assignment; it can be an expression or a function call
+        assignmentOrFunctionCallNode = make_node(AST_ASSIGNMENT, NULL, 2);  // Capacity for two children: Identifier and expression/function call
+        TreeNode *idNode = make_node(IDENTIFIER, identifierToken.value, 0); // Create an identifier node with the value
+
+        // Add identifier node as the first child
+        add_child(assignmentOrFunctionCallNode, idNode);
 
         accept_token(parser, ASSIGNMENT_OPERATOR); // Accept '='
 
-        // Parse the expression or function call and attach it to this assignment node
-        TreeNode* expressionOrFunctionCallNode = parse_expression_or_func_call(parser);
-        assignmentOrFunctionCallNode->right = expressionOrFunctionCallNode;
+        // Parse the expression or function call
+        TreeNode *expressionOrFunctionCallNode = parse_expression_or_func_call(parser, AST_FUNCTION_CALL_IN_ASSIGNMENT);
+
+        // Add the expression or function call node as the second child
+        add_child(assignmentOrFunctionCallNode, expressionOrFunctionCallNode);
     }
     else if (parser->current_token.type == LEFT_PARENTHESIS)
     {
         // It's a function call
-        assignmentOrFunctionCallNode = make_node(AST_FUNCTION_CALL, identifierToken.value);
-        
-        // Parse the function call and attach its arguments to this function call node
-        TreeNode* functionCallNode = parse_function_call(parser);
-        assignmentOrFunctionCallNode->left = functionCallNode->left; // Assuming functionCallNode->left contains arguments
-        free(functionCallNode); // Free the temporary function call node
+        assignmentOrFunctionCallNode = make_node(AST_FUNCTION_CALL, identifierToken.value, 1); // Capacity for one child: function call arguments
+
+        // Parse the function call and get its arguments
+        TreeNode *functionCallNode = parse_function_call(parser, AST_FUNCTION_CALL_IN_ASSIGNMENT, identifierToken.value);
+
+        // Add the function call arguments node as the first child
+        add_child(assignmentOrFunctionCallNode, functionCallNode->children[0]);
+        free(functionCallNode); // Free the temporary function call nodeparse_function_call(parser, AST_FUNCTION_CALL_IN_ASSIGNMENT);
     }
     else
     {
@@ -313,45 +364,47 @@ TreeNode* parse_assignment_or_function_call(Parser *parser)
 }
 
 // Function to get ast from expression
-TreeNode* get_expression_ast(Parser *parser, Token token){
-
-    TreeNode* expressionNode = make_node(AST_EXPRESSION, NULL);
-    expressionNode->left = parse_expression(parser, token, 0);
-    expressionNode->right = NULL;
-    //print_tree(expression); //Used for expression testing
+TreeNode *get_expression_ast(Parser *parser, Token token)
+{
+    // Create a new AST node for the expression
+    TreeNode *expressionNode = make_node(AST_EXPRESSION, NULL, 1);
+    
+    // Parse the expression and add it as the first child
+    TreeNode *childExpression = parse_expression(parser, token, 0);
+    add_child(expressionNode, childExpression);
+    
     return expressionNode;
 }
 
-// Function to parse type
-TreeNode* parse_type(Parser *parser)
+TreeNode *parse_type(Parser *parser)
 {
     // Create a new AST node for this type
-    TreeNode* typeNode = NULL;
+    TreeNode *typeNode = NULL;
 
     switch (parser->current_token.type)
     {
     case INT_KEYWORD:
-        typeNode = make_node(AST_INT_KEYWORD, NULL);
+        typeNode = make_node(AST_INT_KEYWORD, NULL, 0);
         accept_token(parser, INT_KEYWORD);
         break;
     case INT_NULLABLE_KEYWORD:
-        typeNode = make_node(AST_INT_NULLABLE_KEYWORD, NULL);
+        typeNode = make_node(AST_INT_NULLABLE_KEYWORD, NULL, 0);
         accept_token(parser, INT_NULLABLE_KEYWORD);
         break;
     case DOUBLE_KEYWORD:
-        typeNode = make_node(AST_DOUBLE_KEYWORD, NULL);
+        typeNode = make_node(AST_DOUBLE_KEYWORD, NULL, 0);
         accept_token(parser, DOUBLE_KEYWORD);
         break;
     case DOUBLE_NULLABLE_KEYWORD:
-        typeNode = make_node(AST_DOUBLE_NULLABLE_KEYWORD, NULL);
+        typeNode = make_node(AST_DOUBLE_NULLABLE_KEYWORD, NULL, 0);
         accept_token(parser, DOUBLE_NULLABLE_KEYWORD);
         break;
     case STRING_KEYWORD:
-        typeNode = make_node(AST_STRING_KEYWORD, NULL);
+        typeNode = make_node(AST_STRING_KEYWORD, NULL, 0);
         accept_token(parser, STRING_KEYWORD);
         break;
     case STRING_NULLABLE_KEYWORD:
-        typeNode = make_node(AST_STRING_NULLABLE_KEYWORD, NULL);
+        typeNode = make_node(AST_STRING_NULLABLE_KEYWORD, NULL, 0);
         accept_token(parser, STRING_NULLABLE_KEYWORD);
         break;
     default:
@@ -362,147 +415,148 @@ TreeNode* parse_type(Parser *parser)
     return typeNode;
 }
 
-// Function to parse a block
-TreeNode* parse_block(Parser *parser)
+TreeNode *parse_block(Parser *parser)
 {
     // Create a new AST node for this block
-    TreeNode* blockNode = make_node(AST_BLOCK, NULL);
+    TreeNode *blockNode = make_node(AST_BLOCK, NULL, 1);
 
-    accept_token(parser, LEFT_CURLY_BRACE);  // Accept '{'
-    
-    if (parser->current_token.type != RIGHT_CURLY_BRACE) {
+    accept_token(parser, LEFT_CURLY_BRACE); // Accept '{'
+
+    if (parser->current_token.type != RIGHT_CURLY_BRACE)
+    {
         // Parse the statements inside the block only if the block is not empty
-        TreeNode* statementsNode = parse_statements(parser);
-        blockNode->left = statementsNode;
+        TreeNode *statementsNode = parse_statements(parser);
+        add_child(blockNode, statementsNode);
     }
-    
+
     accept_token(parser, RIGHT_CURLY_BRACE); // Accept '}'
 
     return blockNode;
 }
 
-// Function to parse a while loop
-TreeNode* parse_while_loop(Parser *parser)
+TreeNode *parse_while_loop(Parser *parser)
 {
     // Create a new AST node for this while loop
-    TreeNode* whileNode = make_node(AST_LOOP, NULL);
+    TreeNode *whileNode = make_node(AST_LOOP, NULL, 2);
 
     // Expecting 'while' keyword
     accept_token(parser, WHILE_KEYWORD);
 
-    // Parse the expression and attach it as the left child of the while node
-    TreeNode* expressionNode = get_expression_ast(parser, parser->current_token);
-    whileNode->left = expressionNode;
+    // Parse the expression and attach it as the first child of the while node
+    TreeNode *expressionNode = get_expression_ast(parser, parser->current_token);
+    add_child(whileNode, expressionNode);
 
-    // Parse the block and attach it as the right child of the while node
-    TreeNode* blockNode = parse_block(parser);
-    whileNode->right = blockNode;
+    // Parse the block and attach it as the second child of the while node
+    TreeNode *blockNode = parse_block(parser);
+    add_child(whileNode, blockNode);
 
     return whileNode;
 }
 
-// Function to parse an if condition
-TreeNode* parse_if_cond(Parser *parser)
+TreeNode *parse_if_cond(Parser *parser)
 {
-    // Create a new AST node for this if condition
-    TreeNode* ifNode = make_node(AST_CONDITIONAL, NULL);
+    // Create a new AST node for this if condition with capacity for up to 3 children
+    // 1st child is for the condition, 2nd for the if block, 3rd for the optional else block
+    TreeNode *ifNode = make_node(AST_CONDITIONAL, NULL, 0);
 
     // Expecting 'if' keyword
     accept_token(parser, IF_KEYWORD);
 
-    // Parse the expression and attach it as the left child of the if node
-    TreeNode* expressionNode;
+    // Parse the expression
+    TreeNode *expressionNode;
     if (parser->current_token.type == LET_KEYWORD)
     {
         accept_token(parser, LET_KEYWORD);
+        expressionNode = make_node(IDENTIFIER, parser->current_token.value, 0);
         accept_token(parser, IDENTIFIER);
-        // Create a node for the expression involving 'let'
-        expressionNode = make_node(AST_EXPRESSION_OR_ID, NULL);
-        // Attach it to the ifNode
-        ifNode->left = expressionNode;
     }
     else
     {
         expressionNode = get_expression_ast(parser, parser->current_token);
-        ifNode->left = expressionNode;
     }
+    // Attach the expression as the first child
+    add_child(ifNode, expressionNode);
 
-    // Parse the block and attach it as the right child of the if node
-    TreeNode* blockNode = parse_block(parser);
-    ifNode->right = blockNode;
+    // Parse the block and attach it as the second child
+    TreeNode *blockNode = parse_block(parser);
+    add_child(ifNode, blockNode);
 
     // Check for optional 'else' part
     if (parser->current_token.type == ELSE_KEYWORD)
     {
         accept_token(parser, ELSE_KEYWORD);
-        TreeNode* elseNode = make_node(AST_ELSE_PART, NULL);
-        TreeNode* elseBlockNode = parse_block(parser);
-        elseNode->right = elseBlockNode;  // Attach the else block to the right child of elseNode
-        ifNode->right->next = elseNode;  // Attach elseNode to the next of the if block
+        TreeNode *elseBlockNode = parse_block(parser);
+        TreeNode *elseNode = make_node(AST_ELSE_PART, NULL, 1); // Create a node for the else part
+        add_child(elseNode, elseBlockNode); // Attach the else block as the child of elseNode
+
+        // Attach elseNode as the third child of ifNode
+        add_child(ifNode, elseNode);
     }
 
     return ifNode;
 }
 
-// Function to parse a return statement
-TreeNode* parse_return_statement(Parser *parser)
-{
-    // Create a new AST node for this return statement
-    TreeNode* returnNode = make_node(AST_RETURN_STATEMENT, NULL);
-
-    // Expecting 'return' keyword
+TreeNode *parse_return_statement(Parser *parser) {
+    TreeNode *returnNode = make_node(AST_RETURN_STATEMENT, NULL, 1);
     accept_token(parser, RETURN_KEYWORD);
 
-    // Check for optional expression
-    if (is_return_value)
-    {
-        TreeNode* expressionNode = get_expression_ast(parser, parser->current_token);
-        returnNode->left = expressionNode;
+    if (is_return_value) {  // Check this
+        if (is_expression_start_token(look_ahead(0))) {
+            TreeNode *expressionOrFuncCallNode = parse_expression_or_func_call(parser, AST_FUNCTION_CALL);
+            add_child(returnNode, expressionOrFuncCallNode);
+        } else {
+            handle_error(SEMANTIC_RETURN_ERROR);
+        }
+    } else {
+        // Handle return in a void function
+        if (!is_expression_start_token(look_ahead(0))) {
+            handle_error(SEMANTIC_RETURN_ERROR);
+        }
     }
 
     return returnNode;
 }
 
-// Function to parse arguments
-TreeNode* parse_arguments(Parser *parser)
+TreeNode *parse_arguments(Parser *parser)
 {
-    TreeNode* head = NULL; // The first argument node
-    TreeNode* tail = NULL; // The last argument node
+    // Create a new AST node for this arguments collection
+    TreeNode *argumentsNode = make_node(AST_ARGUMENTS, NULL, 0); // Initialized with zero children
 
     // Check if there are arguments
     if (parser->current_token.type != RIGHT_PARENTHESIS)
     {
         // Parse the first argument
-        TreeNode* firstArgumentNode = parse_argument(parser);
-        head = firstArgumentNode;
-        tail = firstArgumentNode;
+        TreeNode *firstArgumentNode = parse_argument(parser);
+
+        // Attach the first argument as the first child
+        add_child(argumentsNode, firstArgumentNode);
 
         // Parse more arguments
         while (parser->current_token.type == COMMA)
         {
             accept_token(parser, COMMA); // Accept ','
-            
-            // Parse the next argument and attach it to the tail
-            TreeNode* nextArgumentNode = parse_argument(parser);
-            tail->next = nextArgumentNode;
-            tail = nextArgumentNode;
+
+            // Parse the next argument and attach it as a child
+            TreeNode *nextArgumentNode = parse_argument(parser);
+            add_child(argumentsNode, nextArgumentNode);
         }
     }
 
-    return head;
+    return argumentsNode;
 }
 
-// Function to parse an individual argument
-TreeNode* parse_argument(Parser *parser)
+TreeNode *parse_argument(Parser *parser)
 {
     // Create a new AST node for this argument
-    TreeNode* argumentNode = make_node(AST_ARGUMENT, NULL);
+    TreeNode *argumentNode = make_node(AST_ARGUMENT, NULL, 0); // Initialized with zero children
 
     if (parser->current_token.type == IDENTIFIER)
     {
         // Create a node for the identifier
-        TreeNode* idNode = make_node(AST_IDENTIFIER, parser->current_token.value);
-        argumentNode->left = idNode; // Attach the idNode to the left of the argumentNode
+        TreeNode *idNode = make_node(AST_IDENTIFIER, parser->current_token.value, 0);
+
+        // Attach idNode as a child to the argumentNode
+        add_child(argumentNode, idNode);
 
         accept_token(parser, IDENTIFIER);
 
@@ -510,43 +564,46 @@ TreeNode* parse_argument(Parser *parser)
         {
             accept_token(parser, COLON);
 
-            // Parse the literal or id and attach it to the right of the argumentNode
-            TreeNode* literalOrIdNode = parse_literal_or_id(parser);
-            argumentNode->right = literalOrIdNode;
+            // Parse the literal or id
+            TreeNode *literalOrIdNode = parse_literal_or_id(parser);
+
+            // Attach literalOrIdNode as a child to the argumentNode
+            add_child(argumentNode, literalOrIdNode);
         }
     }
     else
     {
-        // Parse the literal or id and attach it to the left of the argumentNode
-        TreeNode* literalOrIdNode = parse_literal_or_id(parser);
-        argumentNode->left = literalOrIdNode;
+        // Parse the literal or id
+        TreeNode *literalOrIdNode = parse_literal_or_id(parser);
+
+        // Attach literalOrIdNode as a child to the argumentNode
+        add_child(argumentNode, literalOrIdNode);
     }
 
     return argumentNode; // Return the root of this subtree
 }
 
-// Function to parse a literal or id
-TreeNode* parse_literal_or_id(Parser *parser)
+TreeNode *parse_literal_or_id(Parser *parser)
 {
     // Create a new AST node for this literal or id
-    TreeNode* literalOrIdNode = NULL;
+    TreeNode *literalOrIdNode = NULL;
 
     switch (parser->current_token.type)
     {
     case STRING_LITERAL:
-        literalOrIdNode = make_node(AST_STRING_LITERAL, parser->current_token.value);
+        literalOrIdNode = make_node(AST_STRING_LITERAL, parser->current_token.value, 0);  // Initialize with zero children
         accept_token(parser, STRING_LITERAL);
         break;
     case INTEGER_LITERAL:
-        literalOrIdNode = make_node(AST_INTEGER_LITERAL, parser->current_token.value);
+        literalOrIdNode = make_node(AST_INTEGER_LITERAL, parser->current_token.value, 0);  // Initialize with zero children
         accept_token(parser, INTEGER_LITERAL);
         break;
     case DOUBLE_LITERAL:
-        literalOrIdNode = make_node(AST_DOUBLE_LITERAL, parser->current_token.value);
+        literalOrIdNode = make_node(AST_DOUBLE_LITERAL, parser->current_token.value, 0);  // Initialize with zero children
         accept_token(parser, DOUBLE_LITERAL);
         break;
     case IDENTIFIER:
-        literalOrIdNode = make_node(AST_IDENTIFIER, parser->current_token.value);
+        literalOrIdNode = make_node(AST_IDENTIFIER, parser->current_token.value, 0);  // Initialize with zero children
         accept_token(parser, IDENTIFIER);
         break;
     default:
@@ -554,159 +611,99 @@ TreeNode* parse_literal_or_id(Parser *parser)
         return NULL;
     }
 
-    return literalOrIdNode; // Return the root of this subtree
+    return literalOrIdNode;  // Return the root of this subtree
 }
 
 // Function to parse function definitions
-TreeNode* parse_function_definitions(Parser *parser)
-{
-    TreeNode* head = NULL; // The first function definition node
-    TreeNode* tail = NULL; // The last function definition node
+TreeNode *parse_function_definitions(Parser *parser){
+    TreeNode *funcDefNode = make_node(AST_FUNCTION_DEFINITIONS, NULL, 0);
 
-    while (parser->current_token.type == FUNCTION_KEYWORD)
-    {
-        TreeNode* funcDefNode = parse_function_definition(parser);
-
-        // Add the function definition node to the linked list
-        if (head == NULL) {
-            head = funcDefNode;
-            tail = funcDefNode;
-        } else {
-            tail->next = funcDefNode;
-            tail = funcDefNode;
-        }
+    while (parser->current_token.type == FUNCTION_KEYWORD) {
+        TreeNode *child = parse_function_definition(parser);
+        add_child(funcDefNode, child);
     }
 
-    return head;
+    return funcDefNode;
 }
 
 // Function to parse a single function definition
-TreeNode* parse_function_definition(Parser *parser)
+TreeNode *parse_function_definition(Parser *parser)
 {
-    // Create a new AST node for this function definition
-    TreeNode* funcDefNode = make_node(AST_FUNCTION_DEFINITION, NULL);
 
-    // Expecting 'func' keyword
     accept_token(parser, FUNCTION_KEYWORD);
 
-    // Expecting function identifier
-    TreeNode* idNode = make_node(AST_IDENTIFIER, parser->current_token.value);
-    funcDefNode->left = idNode;
-    TreeNode* lastNode = idNode;
+    TreeNode *funcDefNode = make_node(AST_FUNCTION_DEFINITION, parser->current_token.value, 0);
+
     accept_token(parser, IDENTIFIER);
 
-    // Expecting '('
     accept_token(parser, LEFT_PARENTHESIS);
+    
+    TreeNode *paramsNode = parse_parameters(parser);
+    add_child(funcDefNode, paramsNode);
 
-    // Parse parameters
-    TreeNode* paramsNode = parse_parameters(parser);
-    lastNode->next = paramsNode;
-    while (paramsNode && paramsNode->next != NULL) {
-        paramsNode = paramsNode->next;
-    }
-    lastNode = paramsNode;
-
-    // Expecting ')'
     accept_token(parser, RIGHT_PARENTHESIS);
 
-    is_return_value = false;
-
-    // Check for optional return type
-    if (parser->current_token.type == ARROW)
-    {
-        accept_token(parser, ARROW); // Accept '->'
-        TreeNode* returnTypeNode = parse_type(parser); // Parse the return type
-        lastNode->next = returnTypeNode;
-        lastNode = returnTypeNode;
-        is_return_value = true; 
+    if (parser->current_token.type == ARROW) {
+        accept_token(parser, ARROW);
+        TreeNode *returnTypeNode = parse_type(parser);
+        add_child(funcDefNode, returnTypeNode);
+        is_return_value = true;
     }
+    else
+        is_return_value = false;
 
-    lastNode->next = NULL;
-    // Parse the block
-    TreeNode* blockNode = parse_block(parser);
-    funcDefNode->right = blockNode;
+    TreeNode *blockNode = parse_block(parser);
+    add_child(funcDefNode, blockNode);
 
     return funcDefNode;
 }
 
 // Function to parse parameters
-TreeNode* parse_parameters(Parser *parser)
+TreeNode *parse_parameters(Parser *parser)
 {
-    TreeNode* head = NULL; // The first parameter node
-    TreeNode* tail = NULL; // The last parameter node
+    TreeNode *paramsNode = make_node(AST_PARAMETERS, NULL, 0);
 
-    while (parser->current_token.type == IDENTIFIER || parser->current_token.type == UNDERSCORE)
-    {
-        TreeNode* paramNode = parse_parameter(parser); // The current parameter node
+    while (parser->current_token.type == IDENTIFIER || parser->current_token.type == UNDERSCORE) {
+        TreeNode *paramNode = parse_parameter(parser);
+        add_child(paramsNode, paramNode);
 
-        // Add the parameter node to the linked list
-        if (head == NULL) {
-            head = paramNode;
-            tail = paramNode;
-        } else {
-            tail->next = paramNode;
-            tail = paramNode;
-        }
-
-        // Check for more parameters
-        if (parser->current_token.type == COMMA)
-        {
-            // Expecting ','
+        if (parser->current_token.type == COMMA) {
             accept_token(parser, COMMA);
-        }
-        else
-        {
-            break; // No more parameters
+        } else {
+            break;
         }
     }
 
-    return head;
+    return paramsNode;
 }
 
 // Function to parse a single parameter
-TreeNode* parse_parameter(Parser *parser)
+TreeNode *parse_parameter(Parser *parser)
 {
-    // Create a new AST node for this parameter
-    TreeNode* paramNode = make_node(AST_PARAMETER, NULL);
+    TreeNode *paramNode = make_node(AST_PARAMETER, NULL, 0);
+    
+    TreeNode *nameNode = make_node(AST_PARAMETER_NAME, NULL, 0);
 
-    // Parse the external name (either an identifier or an underscore)
-    TreeNode* externalNameNode = NULL;
-    if (parser->current_token.type == IDENTIFIER)
-    {
-        externalNameNode = make_node(AST_EXTERNAL_NAME, parser->current_token.value);
+    if (parser->current_token.type == IDENTIFIER) {
+        TreeNode *externalNameNode = make_node(AST_EXTERNAL_NAME, parser->current_token.value, 0);
+        add_child(nameNode, externalNameNode);
         accept_token(parser, IDENTIFIER);
-    }
-    else if (parser->current_token.type == UNDERSCORE)
-    {
-        externalNameNode = make_node(AST_UNDERSCORE, NULL);
+    } else {
+        TreeNode *underscoreNode = make_node(AST_UNDERSCORE, NULL, 0);
+        add_child(nameNode, underscoreNode);
         accept_token(parser, UNDERSCORE);
     }
 
-    // Parse the internal name (identifier)
-    TreeNode* internalNameNode = make_node(AST_INTERNAL_NAME, parser->current_token.value);
+    TreeNode *internalNameNode = make_node(AST_INTERNAL_NAME, parser->current_token.value, 0);
+    add_child(nameNode, internalNameNode);
     accept_token(parser, IDENTIFIER);
 
-    // Combine external and internal names into a single node
-    TreeNode* nameNode = make_node(AST_PARAMETER_NAME, NULL);
-    nameNode->left = externalNameNode;
-    nameNode->right = internalNameNode;
-    paramNode->left = nameNode;
+    add_child(paramNode, nameNode);
 
-    // Expecting ':'
     accept_token(parser, COLON);
 
-    // Parse the type
-    TreeNode* typeNode = parse_type(parser);
-    paramNode->right = typeNode;  
+    TreeNode *typeNode = parse_type(parser);
+    add_child(paramNode, typeNode);
 
     return paramNode;
 }
-
-// Main function for testing
-//int main()
-//{
-    //Parser *parser = create_parser();
-    //TreeNode *program = parse_program(parser);
-    //free_parser(parser);
-    //return 0;
-//}

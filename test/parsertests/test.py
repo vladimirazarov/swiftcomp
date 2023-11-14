@@ -115,6 +115,16 @@ class TestParser(unittest.TestCase):
                   func bar() {}'''
         self.assertEqual(run_parser(code), (0, '', ''))
 
+    def test_expressions_and_declarations(self):
+        code = '''func foo() {}
+                  let x : Int = 5 * 5 + 5 - x + aaaa - dslafjlk
+                  x = 324 * 3241514 - 3241
+                  var x = 228
+                  func bar() {}'''
+        self.assertEqual(run_parser(code), (0, '', ''))
+
+
+
 
 
 

@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -g
 
 # Object files
-OBJ = parser.o lexer.o symbol_table.o expressions.o ast_tree.o error.o semantic.o
+OBJ = parser.o lexer.o symbol_table.o expressions.o ast_tree.o error.o semantic.o sym_table_stack.o
 
 # Target executable
 TARGET = semantic 
@@ -26,6 +26,9 @@ lexer.o: lexer.c lexer.h
 
 symbol_table.o: symbol_table.c symbol_table.h
 	$(CC) $(CFLAGS) -c symbol_table.c
+
+sym_table_stack.o: sym_table_stack.c symbol_table.h
+	$(CC) $(CFLAGS) -c sym_table_stack.c
 
 ast_tree.o: ast_tree.c ast_tree.h
 	$(CC) $(CFLAGS) -c ast_tree.c
