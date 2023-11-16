@@ -312,6 +312,14 @@ Symbol* find_in_table(SymStackNode *node, char* name) {
     return find_in_table(node->next, name); // Recursively search in the next table
 }
 
+// Function to search only in the top SymbolTable of the stack
+Symbol* find_in_current_table(SymStackNode *top_node, char* name) {
+    if (!top_node) return NULL; // Stack is empty or no tables present
+
+    // Only search in the top table without recursing further
+    return search(top_node->table->root, name);
+}
+
 Symbol* find_symbol(Stack *stack, char* name) {
     if (!stack) return NULL;
     return find_in_table(stack->top, name);

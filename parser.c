@@ -602,6 +602,10 @@ TreeNode *parse_literal_or_id(Parser *parser)
         literalOrIdNode = make_node(AST_DOUBLE_LITERAL, parser->current_token.value, 0);  // Initialize with zero children
         accept_token(parser, DOUBLE_LITERAL);
         break;
+    case NIL_LITERAL:
+        literalOrIdNode = make_node(AST_NIL_LITERAL, parser->current_token.value, 0);  // Initialize with zero children
+        accept_token(parser, NIL_LITERAL);
+        break;
     case IDENTIFIER:
         literalOrIdNode = make_node(AST_IDENTIFIER, parser->current_token.value, 0);  // Initialize with zero children
         accept_token(parser, IDENTIFIER);
