@@ -22,6 +22,8 @@ typedef union SymbolValueU
     int int_value;
     double double_value;
     bool bool_value;
+    char *id_name;
+    bool is_nil;
 } SymbolValueU;
 
 typedef enum Type
@@ -32,7 +34,8 @@ typedef enum Type
     BOOL_SYMBOL_TYPE,
     NIL_SYMBOL_TYPE,
     EMPTY,
-    FUNCTION_SYMBOL_TYPE
+    FUNCTION_SYMBOL_TYPE, 
+    ID
 } ValueType;
 // Structure to represent a function parameter
 typedef struct Parameter
@@ -63,6 +66,7 @@ typedef struct FunctionInfo
 
     TreeNode* body;
 
+    bool label_was_created;
     // List of parameters
     Parameter *parameters;
 } FunctionInfo;
@@ -138,5 +142,7 @@ SymbolTable* peek(Stack *stack);
 SymbolTable* pop(Stack *stack);
 void push(Stack *stack, SymbolTable *table);
 Stack* init_stack();
+Symbol* find_in_current_table(SymStackNode *top_node, char* name);
+
 
 #endif // SYMBOL_TABLE_H

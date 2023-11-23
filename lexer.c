@@ -62,8 +62,7 @@ void formatstring(char *str, int numspaces, int numLines) {
 }
 
 
-int hextoint(char k)
-{
+int hextoint(char k) {
     int a = k;
     if (a >= 48 && a <= 57)
     {
@@ -80,8 +79,7 @@ int hextoint(char k)
     return -1;
 }
 
-int pwr(int a, int b)
-{
+int pwr(int a, int b) {
     int x = 1;
     for (int i = 0; i < b; i++)
     {
@@ -105,8 +103,7 @@ int countIndentation(char *line) {
 }
 
 //check if the closing delimiter only has indentation on the line
-void checkdelimiter (char *line)
-{
+void checkdelimiter (char *line) {
     int count = 0;
     while (line[count] == ' ' || line[count] == '\t')
     {
@@ -135,14 +132,14 @@ void removeindent(char *str) {
             // Skip leading whitespace
             continue;
         }
-
-        leadingWhitespace = (str[i] == '\n');  // Set flag to check for leading whitespace on the next line
+        // Set flag to check for leading whitespace on the next line
+        leadingWhitespace = (str[i] == '\n');  
 
 
         result[resultIndex++] = str[i];
     }
 
-    result[resultIndex] = '\0';  // Null-terminate the result string
+    result[resultIndex] = '\0';
     strcpy(str, result);
 }
 
@@ -192,16 +189,14 @@ char* replaceTabsWithSpaces(const char* str) {
 
 
 
-Token make_token(TokenType typ, char *hodnota)
-{
+Token make_token(TokenType typ, char *hodnota) {
     Token lex;
     lex.type = typ;
     lex.value = hodnota;
     return lex;
 }
 
-Token get_token()
-{
+Token get_token() {
     State State = start;
     char a;
     char b;
