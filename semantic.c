@@ -466,6 +466,10 @@ void semantic_analysis(TreeNode *root, Context *context)
             {
                 data = evaluate_expression(root->children[2], context, false);
                 generate_code_for_expression(id->value, root->children[2], context);
+                if (context->in_block)
+                    print_pops("LF@", id->value);
+                else 
+                    print_pops("GF@", id->value);
             }
 
             if (root->children[2]->type == AST_FUNCTION_CALL_IN_ASSIGNMENT)
@@ -491,9 +495,14 @@ void semantic_analysis(TreeNode *root, Context *context)
             {
                 is_nullable = true;
             }
-            if (root->children[3]->type == AST_EXPRESSION)
+            if (root->children[3]->type == AST_EXPRESSION){
                 data = evaluate_expression(root->children[3], context, 0);
             generate_code_for_expression(id->value, root->children[3], context);
+                if (context->in_block)
+                    print_pops("LF@", id->value);
+                else 
+                    print_pops("GF@", id->value);
+            }
 
             if (root->children[3]->type == AST_FUNCTION_CALL_IN_ASSIGNMENT)
             {
@@ -571,6 +580,10 @@ void semantic_analysis(TreeNode *root, Context *context)
                 if (data.type != id_symbol->type_and_value.type)
                     handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
                 generate_code_for_expression(id->value, root->children[3], context);
+                if (context->in_block)
+                    print_pops("LF@", id->value);
+                else 
+                    print_pops("GF@", id->value);
 
                 if (data.type == INT_SYMBOL_TYPE)
                     id_symbol->type_and_value.value.int_value = data.value.int_value;
@@ -835,6 +848,10 @@ void semantic_analysis(TreeNode *root, Context *context)
             // Determine the type of the return expression
             if (context->current_function != NULL)
             generate_code_for_expression("!RETURN", root->children[1], context);
+                if (context->in_block)
+                    print_pops("LF@", "!RETURN");
+                else 
+                    print_pops("GF@", "!RETURN");
 
             context->last_return_value = evaluate_expression(root->children[1], context, false);
             // Compare against the function's return type
