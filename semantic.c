@@ -569,8 +569,7 @@ void semantic_analysis(TreeNode *root, Context *context)
                 data = evaluate_expression(root->children[3], context, false);
 
                 if (data.type != id_symbol->type_and_value.type)
-                    // TODO: RIGHT ERR
-                    handle_error(SEMANTIC_TYPE_DERIV_ERROR);
+                    handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
                 generate_code_for_expression(id->value, root->children[3], context);
 
                 if (data.type == INT_SYMBOL_TYPE)
@@ -581,7 +580,6 @@ void semantic_analysis(TreeNode *root, Context *context)
                     id_symbol->type_and_value.value.double_value= data.value.double_value;
                 if (data.type == NIL_SYMBOL_TYPE){
                     if (id_symbol->isNullable == false)
-                        //TODO: RIGHT ERR
                         handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
                     id_symbol->type_and_value.value.is_nil = true;
                 }
@@ -598,7 +596,6 @@ void semantic_analysis(TreeNode *root, Context *context)
                 semantic_analysis(root->children[3], context);
                 root->children[3] = NULL;
                if(context->last_return_value.type != id_symbol->type_and_value.type) 
-                    //TODO: RIGHT ERR
                     handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
 
                 if (data.type == INT_SYMBOL_TYPE)
@@ -609,7 +606,6 @@ void semantic_analysis(TreeNode *root, Context *context)
                     id_symbol->type_and_value.value.double_value= data.value.double_value;
                 if (data.type == NIL_SYMBOL_TYPE){
                     if (id_symbol->isNullable == false)
-                        //TODO: RIGHT ERR
                         handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
                     id_symbol->type_and_value.value.is_nil = true;
                 }
