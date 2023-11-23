@@ -31,28 +31,24 @@ void formatstring(char *str, int numspaces, int numLines) {
             j++;
         }
 
-        //If the line has insufficient indentation, print an error and exit
-        if (linesProcessed > 0 && j < numspaces) {
+        // Check if the line is not empty before checking for insufficient indentation
+        if (linesProcessed > 0 && j < numspaces && str[i] != '\n') {
             fprintf(stderr, "Error: Line %d has insufficient indentation\n", linesProcessed + 1);
             exit(1);
         }
 
-        //Copy the remaining characters to the new string
+        // Copy the remaining characters to the new string
         while (str[i] != '\0' && str[i] != '\n') {
             newStr[newStrIndex++] = str[i++];
         }
 
-        //If the line is not empty, add a newline character to the new string
-        if (newStrIndex > 0 && str[i - 1] != '\n') {
-            newStr[newStrIndex++] = '\n';
-        }
-
-        //Skip the newline character
+        // Add a newline character to the new string
         if (str[i] == '\n') {
+            newStr[newStrIndex++] = '\n';
             i++;
         }
 
-        //Increment the lines processed counter
+        // Increment the lines processed counter
         linesProcessed++;
     }
 
@@ -60,7 +56,6 @@ void formatstring(char *str, int numspaces, int numLines) {
     strcpy(str, newStr);
     free(newStr);
 }
-
 
 int hextoint(char k) {
     int a = k;
@@ -121,27 +116,6 @@ void checkdelimiter (char *line) {
         }  
 }
 
-
-void removeindent(char *str) {
-    char result[strlen(str) + 1];
-    int leadingWhitespace = 1;  // Flag to track leading whitespace
-    int resultIndex = 0;
-
-    for (int i = 0; i < strlen(str); ++i) {
-        if (leadingWhitespace && (str[i] == ' ' || str[i] == '\t')) {
-            // Skip leading whitespace
-            continue;
-        }
-        // Set flag to check for leading whitespace on the next line
-        leadingWhitespace = (str[i] == '\n');  
-
-
-        result[resultIndex++] = str[i];
-    }
-
-    result[resultIndex] = '\0';
-    strcpy(str, result);
-}
 
 
 char* replaceTabsWithSpaces(const char* str) {
@@ -1238,14 +1212,10 @@ Token get_token() {
             while (fgets(line, MAX, stdin) != NULL) 
             {
                 linenumber++;
-                //removeIndentation(line);
-                //printf("%s", line);
                 if (strstr(line, "\"\"\"") != NULL) 
                 {
                 indentation = countIndentation(line);
                 checkdelimiter(line);
-                // Print the line number and the count of indentation
-                //printf("Line %d: Indentation count = %d\n", linenumber, indentation);
                 delimiterindex = linenumber;
                 break;
                 }               
