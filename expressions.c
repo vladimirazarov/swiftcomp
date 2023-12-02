@@ -141,27 +141,31 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
     if (node->type == INTEGER_LITERAL)
     {
         data.type = INT_SYMBOL_TYPE;
+        data.value.int_value = atoi(node->value);
         return data;
     }
     else if (node->type == DOUBLE_LITERAL)
     {
         data.type = DOUBLE_SYMBOL_TYPE;
+        data.value.double_value = atof(node->value);
         return data;
     }
     else if (node->type == STRING_LITERAL)
     {
         data.type = STRING_SYMBOL_TYPE;
+        data.value.str_value = node->value;
         return data;
     }
     else if (node->type == NIL_LITERAL)
     {
         data.type = NIL_SYMBOL_TYPE;
+        data.value.is_nil = true;
         return data;
     }
     else if (node->type == AST_IDENTIFIER)
     {
-        if (context->function_called)
-        {
+        //if (context->function_called)
+        //{
             Symbol *symbol = find_symbol(context->sym_table_stack, node->value);
             if (symbol == NULL)
             {
@@ -169,7 +173,7 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
             }
             data.type = symbol->type_and_value.type; // Only get the type
             data.value = symbol->type_and_value.value;
-        }
+        //}
         return data;
     }
 
@@ -184,19 +188,27 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
         if (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE)
         {
             data.type = INT_SYMBOL_TYPE;
+            data.value.int_value = left_eval.value.int_value + right_eval.value.int_value;
         }
         else if (left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE)
         {
             data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value + right_eval.value.double_value;
         }
-        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE) || 
-                 (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE))
         {
             data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value + right_eval.value.int_value;
+        }
+        else if ((left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.int_value + right_eval.value.double_value;
         }
         else if (left_eval.type == STRING_SYMBOL_TYPE && right_eval.type == STRING_SYMBOL_TYPE)
         {
             data.type = STRING_SYMBOL_TYPE;
+            data.value.str_value = strcat(left_eval.value.str_value, right_eval.value.str_value);
         }
         else
         {
@@ -206,18 +218,25 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
         
         break;
     case MINUS_OPERATOR:
-         if (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE)
+        if (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE)
         {
             data.type = INT_SYMBOL_TYPE;
+            data.value.int_value = left_eval.value.int_value - right_eval.value.int_value;
         }
         else if (left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE)
         {
             data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value - right_eval.value.double_value;
         }
-        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE) || 
-                 (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE))
         {
             data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value - right_eval.value.int_value;
+        }
+        else if ((left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.int_value - right_eval.value.double_value;
         }
         else
         {
@@ -229,15 +248,22 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
         if(left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE)
         {
             data.type = INT_SYMBOL_TYPE;
+            data.value.int_value = left_eval.value.int_value / right_eval.value.int_value;
         }
         else if(left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE)
         {
             data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value / right_eval.value.double_value;
         }
-        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE) || 
-                 (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE))
         {
             data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value / right_eval.value.int_value;
+        }
+        else if ((left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.int_value / right_eval.value.double_value;
         }
         else
         {
@@ -248,15 +274,22 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
         if(left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE)
         {
             data.type = INT_SYMBOL_TYPE;
+            data.value.int_value = left_eval.value.int_value * right_eval.value.int_value;
         }
         else if(left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE)
         {
             data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value * right_eval.value.double_value;
         }
-        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE) || 
-                 (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE))
         {
             data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value * right_eval.value.int_value;
+        }
+        else if((left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.int_value * right_eval.value.double_value;
         }
         else
         {
@@ -267,6 +300,24 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
         if(left_eval.type == right_eval.type)
         {
             data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value == right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value == right_eval.value.double_value;
+                break;
+            case BOOL_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.bool_value == right_eval.value.bool_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = strcmp(left_eval.value.str_value, right_eval.value.str_value);
+                break;
+            default:
+                handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+                break;
+            }
         } 
         else
         {
@@ -277,6 +328,24 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
         if(left_eval.type == right_eval.type)
         {
             data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value != right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value != right_eval.value.double_value;
+                break;
+            case BOOL_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.bool_value != right_eval.value.bool_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = 1 - strcmp(left_eval.value.str_value, right_eval.value.str_value);
+                break;
+            default:
+                handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+                break;
+            }
         }
         else
         {
@@ -287,6 +356,18 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
         if(left_eval.type == right_eval.type)
         {
             data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value < right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value < right_eval.value.double_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.str_value < right_eval.value.str_value;
+                break;
+            }
         }
         else
         {
@@ -297,6 +378,18 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
         if(left_eval.type == right_eval.type)
         {
             data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value > right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value > right_eval.value.double_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.str_value > right_eval.value.str_value;
+                break;
+            }
         }
         else
         {
@@ -307,6 +400,18 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
         if(left_eval.type == right_eval.type)
         {
             data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value <= right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value <= right_eval.value.double_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.str_value <= right_eval.value.str_value;
+                break;
+            }
         }
         else
         {
@@ -317,6 +422,18 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
         if(left_eval.type == right_eval.type)
         {
             data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value >= right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value >= right_eval.value.double_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.str_value >= right_eval.value.str_value;
+                break;
+            }
         }
         else
         {
@@ -326,11 +443,11 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
     case DOUBLE_QMARK_OPERATOR:
         if(left_eval.type != NIL_SYMBOL_TYPE)
         {
-            data.type = left_eval.type;
+            data = left_eval;
         }
         else if(left_eval.type == NIL_SYMBOL_TYPE)
         {
-            data.type = right_eval.type;
+            data = right_eval;
         }
         else
         {
@@ -340,7 +457,7 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
     case EXCLAMATION_MARK:
         if(left_eval.type != NIL_SYMBOL_TYPE)
         {
-            data.type = left_eval.type;
+            data = left_eval;
         } 
         else
         {
@@ -388,10 +505,20 @@ generate_code_for_expression(const char *var_to_save, TreeNode *node, Context *c
         print_pushs("string@", node->value);
         break;
     case DOUBLE_LITERAL:
-        print_pushs("float@", node->value);
+        print_pushs("", convert_double_char_to_hex_str(node->value));
         break;
     case NIL_LITERAL:
         print_pushs("nil@nil", "");
+        break;
+    case IDENTIFIER:
+        if(context->function_called || context->in_block)
+        {
+            print_pushs("LF@", node->value);
+        }
+        else
+        {
+            print_pushs("GF@", node->value);
+        }
         break;
     case PLUS_OPERATOR:
         dataL = evaluate_expression(node->children[0], context, false);
@@ -507,6 +634,52 @@ generate_code_for_expression(const char *var_to_save, TreeNode *node, Context *c
     case GREATER_THAN_EQUAL_OPERATOR:
         printf("LTS\n");
         printf("NOTS\n");
+        break;
+    case DOUBLE_QMARK_OPERATOR:
+
+        dataL = evaluate_expression(node->children[0], context, false);
+        dataR = evaluate_expression(node->children[1], context, false);
+
+        EvaluatedExpressionData data;
+        char *prefix;
+        char *suffix;
+
+        if(dataL.type != NIL_SYMBOL_TYPE){
+            data = dataL;
+        }
+        else
+        {
+            data = dataR;
+        }
+
+        switch(data.type){
+            case INT_SYMBOL_TYPE:
+                prefix = "int@";
+                sprintf(suffix, "%d", data.value.int_value);
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                prefix = "";
+                suffix = convert_double_num_to_hex_string(data.value.double_value);
+                break;
+            case STRING_SYMBOL_TYPE:
+                prefix = "string@";
+                suffix = data.value.str_value;
+                break;
+            case BOOL_SYMBOL_TYPE:
+                prefix = "bool@";
+                sprintf(suffix, "%s", data.value.bool_value ? "true" : "false");
+                break;
+            default:
+                handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+                break;
+        }
+        print_createframe();
+        print_pushframe();
+        print_declaration("LF@", "tempVal");
+        print_pops("LF@", "tempVal");
+        print_pops("LF@", "tempVal");
+        print_popframe();
+        print_pushs(prefix, suffix);
         break;
     default:
         break;
