@@ -1,3 +1,9 @@
+//INPUT: swift code
+//OUTPUT: stream of tokens
+//Function get_token allocates next token in swift code provided as input
+//Author: Martin Packa <xpacka00>
+
+
 #include "lexer.h"
 #include <stdio.h>
 #include <string.h>
@@ -12,7 +18,8 @@ void formatstring(char *str, int numspaces, int numLines) {
     int linesProcessed = 0;
     // Allocate memory for the new string
     char *newStr = (char *)malloc(strlen(str) + 1);
-    if (newStr == NULL) {
+    if (newStr == NULL) 
+    {
         // Handle memory allocation failure
         fprintf(stderr, "Memory allocation failed\n");
         exit(1);
@@ -20,30 +27,36 @@ void formatstring(char *str, int numspaces, int numLines) {
 
     int newStrIndex = 0;
 
-    while (linesProcessed < numLines && str[i] != '\0') {
+    while (linesProcessed < numLines && str[i] != '\0') 
+    {
         // Find the first non-space character
         int j = 0;
-        while (linesProcessed == 0 && str[i] == ' ') {
+        while (linesProcessed == 0 && str[i] == ' ') 
+        {
             i++;
         }
-        while (linesProcessed > 0 && j < numspaces && str[i] == ' ') {
+        while (linesProcessed > 0 && j < numspaces && str[i] == ' ') 
+        {
             i++;
             j++;
         }
 
         // Check if the line is not empty before checking for insufficient indentation
-        if (linesProcessed > 0 && j < numspaces && str[i] != '\n') {
+        if (linesProcessed > 0 && j < numspaces && str[i] != '\n') 
+        {
             fprintf(stderr, "Error: Line %d has insufficient indentation\n", linesProcessed + 1);
             exit(1);
         }
 
         // Copy the remaining characters to the new string
-        while (str[i] != '\0' && str[i] != '\n') {
+        while (str[i] != '\0' && str[i] != '\n') 
+        {
             newStr[newStrIndex++] = str[i++];
         }
 
         // Add a newline character to the new string
-        if (str[i] == '\n') {
+        if (str[i] == '\n') 
+        {
             newStr[newStrIndex++] = '\n';
             i++;
         }
@@ -123,8 +136,10 @@ char* replaceTabsWithSpaces(const char* str) {
     int len = strlen(str);
 
     // Count the number of tabs in the original string
-    for (int i = 0; i < len; i++) {
-        if (str[i] == '\t') {
+    for (int i = 0; i < len; i++) 
+    {
+        if (str[i] == '\t') 
+        {
             tabCount++;
         }
     }
@@ -135,22 +150,26 @@ char* replaceTabsWithSpaces(const char* str) {
     // Allocate memory for the modified string
     char* modifiedStr = (char*)malloc(modifiedLen);
 
-    if (modifiedStr == NULL) {
+    if (modifiedStr == NULL) 
+    {
         fprintf(stderr, "Memory allocation failed.\n");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
 
     int j = 0;
 
     // Copy characters, replacing tabs with spaces
-    for (int i = 0; i < len; i++) {
-        if (str[i] == '\t') {
+    for (int i = 0; i < len; i++) 
+    {
+        if (str[i] == '\t') 
+        {
             // Replace tab with four spaces
             modifiedStr[j++] = ' ';
             modifiedStr[j++] = ' ';
             modifiedStr[j++] = ' ';
             modifiedStr[j++] = ' ';
-        } else {
+        } else 
+        {
             modifiedStr[j++] = str[i];
         }
     }
@@ -236,7 +255,7 @@ Token get_token() {
                 State = identifier;
             }
             else if (a == '"')
-            { //multiline string handling missing
+            {
                 State = string;
             }
             else if (a >= 48 && a <= 57)
@@ -407,7 +426,6 @@ Token get_token() {
         case Int:
             str = "";
             i = 0;
-            // z = 0;
             while ((a >= 48 && a <= 57) || a == '.' || a == 'e' || a == 'E')
             {
                 size_t len = strlen(str);
@@ -439,7 +457,7 @@ Token get_token() {
             return make_token(INTEGER_LITERAL, str);
             break;
 
-        case ddouble: // work pls
+        case ddouble:
             if (a == '.')
             {
                 a = getchar();
@@ -644,13 +662,16 @@ Token get_token() {
                     else if (a == 'u')
                     {
                         a = getchar();
-                        if (a == '{') {
+                        if (a == '{') 
+                        {
                             a = getchar();
-                            if (a == '"') { //handle case where quotes are placed directly behind the first bracket 
+                            if (a == '"') 
+                            { //handle case where quotes are placed directly behind the first bracket 
                                 size_t len = strlen(str);
                                 char *str2 = malloc(len + 1 + 3);
                                 strcpy(str2, str);
-                                if(i>0){
+                                if(i>0)
+                                {
                                     free(str);
                                 }
                                 str2[len] = 92;
@@ -662,16 +683,20 @@ Token get_token() {
                                 State = stringvalid;
                                 break;
                             }
-                            while ((a <= 57 && a >= 48) || (a >= 65 && a<= 70) || (a >= 97 && a <= 102) || z <= 7) {
-                                if (a != '}') {
+                            while ((a <= 57 && a >= 48) || (a >= 65 && a<= 70) || (a >= 97 && a <= 102) || z <= 7) 
+                            {
+                                if (a != '}') 
+                                {
                                     arr[z] = a;
                                     z++;
                                 }
-                                if (a == '}' && z == 0) {
+                                if (a == '}' && z == 0) 
+                                {
                                 size_t len = strlen(str);
                                 char *str2 = malloc(len + 1 + 4);
                                 strcpy(str2, str);
-                                if(i>0){
+                                if(i>0)
+                                {
                                     free(str);
                                 }
                                 str2[len] = 92;
@@ -684,7 +709,8 @@ Token get_token() {
                                 cflag = 1;
                                 break;
                             }
-                                if (!(arr[0] <= 57 && arr[0] >= 48) && !(arr[0] >= 65 && arr[0]<= 70) && !(arr[0] >= 97 && arr[0] <= 102)) {
+                                if (!(arr[0] <= 57 && arr[0] >= 48) && !(arr[0] >= 65 && arr[0]<= 70) && !(arr[0] >= 97 && arr[0] <= 102)) 
+                                {
                                     size_t len = strlen(str);
                                     char *str2 = malloc(len + 1 + 4);
                                     strcpy(str2, str);
@@ -701,7 +727,8 @@ Token get_token() {
                                     cflag = 1;
                                     break;
                                 }
-                                if (z > 8) { 
+                                if (z > 8) 
+                                { 
                                     size_t len = strlen(str);
                                     char *str2 = malloc(len + 1 + 11);
                                     strcpy(str2, str);
@@ -722,18 +749,20 @@ Token get_token() {
                                     str2[len + 11] = '\0';
                                     str = str2;
                                     i++;
-                                    //cflag = 1;
                                     break;
                                 }
                                 a = getchar();
-                                if ( a == '}') {
-                                        while (z != 0) {
+                                if ( a == '}') 
+                                {
+                                        while (z != 0) 
+                                        {
                                             z--;
                                             c += hextoint(arr[y]) * pwr(16, z);
                                             y++;
                                         }
 
-                                        if (c != 0) {
+                                        if (c != 0) 
+                                        {
                                         size_t len = strlen(str);
                                         char *str2 = malloc(len + 1 + 1);
                                         strcpy(str2, str);
@@ -747,7 +776,8 @@ Token get_token() {
                                         a = getchar();
                                         break;
                                         } 
-                                        else if (c == 0) {
+                                        else if (c == 0) 
+                                        {
                                             size_t len = strlen(str);
                                             char *str2 = malloc(len + 1 + 4);
                                             strcpy(str2, str);
@@ -761,16 +791,17 @@ Token get_token() {
                                             str2[len + 4] = '\0';
                                             str = str2;
                                             i++;
-                                            //a = getchar();
                                             break;
                                         
                                         }
                                     }
-                               else if (!(a <= 57 && a >= 48) && !(a >= 65 && a<= 70) && !(a >= 97 && a <= 102) && !(a == '"')) {
+                               else if (!(a <= 57 && a >= 48) && !(a >= 65 && a<= 70) && !(a >= 97 && a <= 102) && !(a == '"')) 
+                               {
                                         size_t len = strlen(str);
                                         char *str2 = malloc(len + 1 + 3);
                                         strcpy(str2, str);
-                                        if(i>0){
+                                        if(i>0)
+                                        {
                                             free(str);
                                         }
                                         str2[len] = 92;
@@ -779,13 +810,14 @@ Token get_token() {
                                         str2[len + 3] = '\0';
                                         str = str2;
                                         i++;
-                                        switch (z) {                //switch>loop
+                                        switch (z) {   //print raw input of escape sequence
 
                                             case 1:
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 2);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -800,7 +832,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 3);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -816,7 +849,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 4);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -833,7 +867,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 5);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -851,7 +886,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 6);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -870,7 +906,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 7);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -890,7 +927,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 8);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -911,7 +949,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 9);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -931,16 +970,19 @@ Token get_token() {
 
                                             
                                         }
-                                        if (cflag == 1){
+                                        if (cflag == 1)
+                                        {
                                             break;
                                         }
                                     
                                 } 
-                                else if (a == '"') {
+                                else if (a == '"') 
+                                {
                                     size_t len = strlen(str);
                                     char *str2 = malloc(len + 1 + 3);
                                     strcpy(str2, str);
-                                    if(i>0){
+                                    if(i>0)
+                                    {
                                         free(str);
                                     }
                                     str2[len] = 92;
@@ -949,13 +991,14 @@ Token get_token() {
                                     str2[len + 3] = '\0';
                                     str = str2;
                                     i++;
-                                    switch (z) {                //switch>loop
+                                    switch (z) {
 
                                         case 1:
                                             len = strlen(str);
                                             str2 = malloc(len + 1 + 2);
                                             strcpy(str2, str);
-                                            if (i>0){
+                                            if (i>0)
+                                            {
                                                 free(str);
                                             }
                                             str2[len] = arr[0];
@@ -970,7 +1013,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 3);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -986,7 +1030,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 4);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1003,7 +1048,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 5);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1021,7 +1067,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 6);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1040,7 +1087,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 7);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1060,7 +1108,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 8);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1081,7 +1130,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 9);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1101,19 +1151,23 @@ Token get_token() {
 
                                             
                                     }
-                                    if (cflag == 1){
+                                    if (cflag == 1)
+                                    {
                                         break;
                                     }
 
                                 }
                             }
 
-                            } else {                            //braces missing, add u to the string
+                            } 
+                            else
+                            {                            //braces missing, add u to the string
                                 ungetc(a, stdin);
                                 size_t len = strlen(str);
                                 char *str2 = malloc(len + 1 + 2);
                                 strcpy(str2, str);
-                                if(i>0){
+                                if(i>0)
+                                {
                                     free(str);
                                 }
                                 str2[len] = 92;
@@ -1129,11 +1183,13 @@ Token get_token() {
                         exit(1);
                     }
                 }
-                if (a == '"') {
+                if (a == '"') 
+                {
                     State = stringvalid;
                     break;
                 }
-                if (cflag != 1){
+                if (cflag != 1)
+                {
                 size_t len = strlen(str);
                 char *str2 = malloc(len + 1 + 1);
                 strcpy(str2, str);
@@ -1144,7 +1200,9 @@ Token get_token() {
                 str2[len] = a;
                 str2[len + 1] = '\0';
                 str = str2;
-                } else {
+                } 
+                else 
+                {
                 cflag = 0;
                 }
                 a = getchar();
@@ -1174,7 +1232,7 @@ Token get_token() {
             n = 0;
             delimiterindex = 0;
             a = getchar();
-            if (a != '\n') //triggers randomly lmfao
+            if (a != '\n')
             {
                 fprintf(stderr, "error: multi-line string literal content must begin on a new line");
                 exit(1);
@@ -1224,7 +1282,7 @@ Token get_token() {
            
 
 
-            while (a != EOF) //a can be equal to " however it cant contain """ a == '\n' || a > 31
+            while (a != EOF) //a can be equal to " however it cant contain """
             {
                 y = 0;
                 z = 0;
@@ -1251,9 +1309,11 @@ Token get_token() {
                     else if (a == 'u')
                     {
                         a = getchar();
-                        if (a == '{') {
+                        if (a == '{') 
+                        {
                             a = getchar();
-                            if (a == '"') { //handle case where quotes are placed directly behind the first bracket 
+                            if (a == '"') 
+                            { //handle case where quotes are placed directly behind the first bracket 
                                 size_t len = strlen(str);
                                 char *str2 = malloc(len + 1 + 3);
                                 strcpy(str2, str);
@@ -1269,12 +1329,15 @@ Token get_token() {
                                 State = stringvalid;
                                 break;
                             }
-                            while ((a <= 57 && a >= 48) || (a >= 65 && a<= 70) || (a >= 97 && a <= 102) || z <= 7) {
-                                if (a != '}') {
+                            while ((a <= 57 && a >= 48) || (a >= 65 && a<= 70) || (a >= 97 && a <= 102) || z <= 7) 
+                            {
+                                if (a != '}') 
+                                {
                                     arr[z] = a;
                                     z++;
                                 }
-                                if (a == '}' && z == 0) {
+                                if (a == '}' && z == 0) 
+                                {
                                 size_t len = strlen(str);
                                 char *str2 = malloc(len + 1 + 4);
                                 strcpy(str2, str);
@@ -1291,7 +1354,8 @@ Token get_token() {
                                 cflag = 1;
                                 break;
                             }
-                                if (!(arr[0] <= 57 && arr[0] >= 48) && !(arr[0] >= 65 && arr[0]<= 70) && !(arr[0] >= 97 && arr[0] <= 102)) {
+                                if (!(arr[0] <= 57 && arr[0] >= 48) && !(arr[0] >= 65 && arr[0]<= 70) && !(arr[0] >= 97 && arr[0] <= 102)) 
+                                {
                                     size_t len = strlen(str);
                                     char *str2 = malloc(len + 1 + 4);
                                     strcpy(str2, str);
@@ -1308,7 +1372,8 @@ Token get_token() {
                                     cflag = 1;
                                     break;
                                 }
-                                if (z > 8) { 
+                                if (z > 8) 
+                                { 
                                     size_t len = strlen(str);
                                     char *str2 = malloc(len + 1 + 11);
                                     strcpy(str2, str);
@@ -1329,18 +1394,20 @@ Token get_token() {
                                     str2[len + 11] = '\0';
                                     str = str2;
                                     i++;
-                                    //cflag = 1;
                                     break;
                                 }
                                 a = getchar();
-                                if ( a == '}') {
-                                        while (z != 0) {
+                                if ( a == '}') 
+                                {
+                                        while (z != 0) 
+                                        {
                                             z--;
                                             c += hextoint(arr[y]) * pwr(16, z);
                                             y++;
                                         }
 
-                                        if (c != 0) {
+                                        if (c != 0) 
+                                        {
                                         size_t len = strlen(str);
                                         char *str2 = malloc(len + 1 + 1);
                                         strcpy(str2, str);
@@ -1354,7 +1421,8 @@ Token get_token() {
                                         a = getchar();
                                         break;
                                         } 
-                                        else if (c == 0) {
+                                        else if (c == 0) 
+                                        {
                                             size_t len = strlen(str);
                                             char *str2 = malloc(len + 1 + 4);
                                             strcpy(str2, str);
@@ -1368,16 +1436,17 @@ Token get_token() {
                                             str2[len + 4] = '\0';
                                             str = str2;
                                             i++;
-                                            //a = getchar();
                                             break;
                                         
                                         }
                                     }
-                               else if (!(a <= 57 && a >= 48) && !(a >= 65 && a<= 70) && !(a >= 97 && a <= 102) && !(a == '"')) {
+                               else if (!(a <= 57 && a >= 48) && !(a >= 65 && a<= 70) && !(a >= 97 && a <= 102) && !(a == '"')) 
+                               {
                                         size_t len = strlen(str);
                                         char *str2 = malloc(len + 1 + 3);
                                         strcpy(str2, str);
-                                        if(i>0){
+                                        if(i>0)
+                                        {
                                             free(str);
                                         }
                                         str2[len] = 92;
@@ -1386,13 +1455,14 @@ Token get_token() {
                                         str2[len + 3] = '\0';
                                         str = str2;
                                         i++;
-                                        switch (z) {                //switch>loop
+                                        switch (z) {
 
                                             case 1:
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 2);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1407,7 +1477,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 3);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -1423,7 +1494,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 4);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -1440,7 +1512,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 5);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -1458,7 +1531,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 6);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -1477,7 +1551,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 7);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -1497,7 +1572,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 8);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -1518,7 +1594,8 @@ Token get_token() {
                                                     len = strlen(str);
                                                     str2 = malloc(len + 1 + 9);
                                                     strcpy(str2, str);
-                                                    if (i>0){
+                                                    if (i>0)
+                                                    {
                                                         free(str);
                                                     }
                                                     str2[len] = arr[0];
@@ -1538,16 +1615,19 @@ Token get_token() {
 
                                             
                                         }
-                                        if (cflag == 1){
+                                        if (cflag == 1)
+                                        {
                                             break;
                                         }
                                     
                                 } 
-                                else if (a == '"') {
+                                else if (a == '"') 
+                                {
                                     size_t len = strlen(str);
                                     char *str2 = malloc(len + 1 + 3);
                                     strcpy(str2, str);
-                                    if(i>0){
+                                    if(i>0)
+                                    {
                                         free(str);
                                     }
                                     str2[len] = 92;
@@ -1556,13 +1636,14 @@ Token get_token() {
                                     str2[len + 3] = '\0';
                                     str = str2;
                                     i++;
-                                    switch (z) {                //switch>loop
+                                    switch (z) {
 
                                         case 1:
                                             len = strlen(str);
                                             str2 = malloc(len + 1 + 2);
                                             strcpy(str2, str);
-                                            if (i>0){
+                                            if (i>0)
+                                            {
                                                 free(str);
                                             }
                                             str2[len] = arr[0];
@@ -1577,7 +1658,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 3);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1593,7 +1675,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 4);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1610,7 +1693,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 5);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1628,7 +1712,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 6);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1647,7 +1732,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 7);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1667,7 +1753,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 8);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1688,7 +1775,8 @@ Token get_token() {
                                                 len = strlen(str);
                                                 str2 = malloc(len + 1 + 9);
                                                 strcpy(str2, str);
-                                                if (i>0){
+                                                if (i>0)
+                                                {
                                                     free(str);
                                                 }
                                                 str2[len] = arr[0];
@@ -1708,14 +1796,17 @@ Token get_token() {
 
                                             
                                     }
-                                    if (cflag == 1){
+                                    if (cflag == 1)
+                                    {
                                         break;
                                     }
 
                                 }
                             }
 
-                            } else {                            //braces missing, add u to the string
+                            } 
+                            else 
+                            {                            //braces missing, add u to the string
                                 ungetc(a, stdin);
                                 size_t len = strlen(str);
                                 char *str2 = malloc(len + 1 + 2);
@@ -1787,7 +1878,8 @@ Token get_token() {
 
                 }
             }
-                if (cflag != 1){
+                if (cflag != 1)
+                {
                 size_t len = strlen(str);
                 char *str2 = malloc(len + 1 + 1);
                 strcpy(str2, str);
@@ -1798,7 +1890,9 @@ Token get_token() {
                 str2[len] = a;
                 str2[len + 1] = '\0';
                 str = str2;
-                } else {
+                } 
+                else 
+                {
                 cflag = 0;
                 }
                 a = getchar();
@@ -1817,12 +1911,14 @@ Token get_token() {
 
                         }
                     }
-                    else {
+                    else 
+                    {
                         cflag = 0;
                     }
 
                 }
-                else {
+                else 
+                {
                     cflag = 0;
                 }
             }
