@@ -141,27 +141,31 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
     if (node->type == INTEGER_LITERAL)
     {
         data.type = INT_SYMBOL_TYPE;
+        data.value.int_value = atoi(node->value);
         return data;
     }
     else if (node->type == DOUBLE_LITERAL)
     {
         data.type = DOUBLE_SYMBOL_TYPE;
+        data.value.double_value = atof(node->value);
         return data;
     }
     else if (node->type == STRING_LITERAL)
     {
         data.type = STRING_SYMBOL_TYPE;
+        data.value.str_value = node->value;
         return data;
     }
     else if (node->type == NIL_LITERAL)
     {
         data.type = NIL_SYMBOL_TYPE;
+        data.value.is_nil = true;
         return data;
     }
     else if (node->type == AST_IDENTIFIER)
     {
-        if (context->function_called)
-        {
+        //if (context->function_called)
+        //{
             Symbol *symbol = find_symbol(context->sym_table_stack, node->value);
             if (symbol == NULL)
             {
@@ -169,8 +173,7 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
             }
             data.type = symbol->type_and_value.type; // Only get the type
             data.value = symbol->type_and_value.value;
-        }
-
+        //}
         return data;
     }
 
@@ -179,56 +182,302 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
     EvaluatedExpressionData right_eval = evaluate_expression(node->children[1], context, must_be_truth_value);
 
     // Type determination for operators (without calculating values)
-    if (node->type == PLUS_OPERATOR)
+    switch (node->type)
     {
+    case PLUS_OPERATOR:
         if (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE)
         {
             data.type = INT_SYMBOL_TYPE;
+            data.value.int_value = left_eval.value.int_value + right_eval.value.int_value;
         }
         else if (left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE)
         {
             data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value + right_eval.value.double_value;
+        }
+        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value + right_eval.value.int_value;
+        }
+        else if ((left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.int_value + right_eval.value.double_value;
         }
         else if (left_eval.type == STRING_SYMBOL_TYPE && right_eval.type == STRING_SYMBOL_TYPE)
         {
             data.type = STRING_SYMBOL_TYPE;
+            data.value.str_value = strcat(left_eval.value.str_value, right_eval.value.str_value);
         }
         else
         {
             // Handle type incompatibility error for addition
             handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
         }
-    }
-    else if (node->type == MINUS_OPERATOR)
-    {
+        
+        break;
+    case MINUS_OPERATOR:
         if (left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE)
         {
             data.type = INT_SYMBOL_TYPE;
+            data.value.int_value = left_eval.value.int_value - right_eval.value.int_value;
         }
         else if (left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE)
         {
             data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value - right_eval.value.double_value;
+        }
+        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value - right_eval.value.int_value;
+        }
+        else if ((left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.int_value - right_eval.value.double_value;
         }
         else
         {
             // Handle type incompatibility error for addition
             handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
         }
-    }
-    else
-    {
-        if (right_eval.type == EMPTY)
-            return left_eval;
+        break;
+    case DIVISION_OPERATOR:
+        if(left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE)
+        {
+            data.type = INT_SYMBOL_TYPE;
+            data.value.int_value = left_eval.value.int_value / right_eval.value.int_value;
+        }
+        else if(left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE)
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value / right_eval.value.double_value;
+        }
+        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value / right_eval.value.int_value;
+        }
+        else if ((left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.int_value / right_eval.value.double_value;
+        }
         else
+        {
+            handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+        }
+        break;
+    case MULTIPLICATION_OPERATOR:
+        if(left_eval.type == INT_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE)
+        {
+            data.type = INT_SYMBOL_TYPE;
+            data.value.int_value = left_eval.value.int_value * right_eval.value.int_value;
+        }
+        else if(left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE)
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value * right_eval.value.double_value;
+        }
+        else if ((left_eval.type == DOUBLE_SYMBOL_TYPE && right_eval.type == INT_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.double_value * right_eval.value.int_value;
+        }
+        else if((left_eval.type == INT_SYMBOL_TYPE && right_eval.type == DOUBLE_SYMBOL_TYPE))
+        {
+            data.type = DOUBLE_SYMBOL_TYPE;
+            data.value.double_value = left_eval.value.int_value * right_eval.value.double_value;
+        }
+        else
+        {
+            handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+        }
+        break;
+    case EQUALITY_OPERATOR:
+        if(left_eval.type == right_eval.type)
+        {
+            data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value == right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value == right_eval.value.double_value;
+                break;
+            case BOOL_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.bool_value == right_eval.value.bool_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = strcmp(left_eval.value.str_value, right_eval.value.str_value);
+                break;
+            default:
+                handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+                break;
+            }
+        } 
+        else
+        {
+            handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+        }
+        break;
+    case NOT_EQUAL_OPERATOR:
+        if(left_eval.type == right_eval.type)
+        {
+            data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value != right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value != right_eval.value.double_value;
+                break;
+            case BOOL_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.bool_value != right_eval.value.bool_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = 1 - strcmp(left_eval.value.str_value, right_eval.value.str_value);
+                break;
+            default:
+                handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+                break;
+            }
+        }
+        else
+        {
+            handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+        }
+        break;
+    case LESS_THAN_OPERATOR:
+        if(left_eval.type == right_eval.type)
+        {
+            data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value < right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value < right_eval.value.double_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.str_value < right_eval.value.str_value;
+                break;
+            }
+        }
+        else
+        {
+            handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+        }
+        break;
+    case GREATER_THAN_OPERATOR:
+        if(left_eval.type == right_eval.type)
+        {
+            data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value > right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value > right_eval.value.double_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.str_value > right_eval.value.str_value;
+                break;
+            }
+        }
+        else
+        {
+            handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+        }
+        break;
+    case LESS_THAN_EQUAL_OPERATOR:
+        if(left_eval.type == right_eval.type)
+        {
+            data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value <= right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value <= right_eval.value.double_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.str_value <= right_eval.value.str_value;
+                break;
+            }
+        }
+        else
+        {
+            handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+        }
+        break;
+    case GREATER_THAN_EQUAL_OPERATOR:
+        if(left_eval.type == right_eval.type)
+        {
+            data.type = BOOL_SYMBOL_TYPE;
+            switch (left_eval.type)
+            {
+            case INT_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.int_value >= right_eval.value.int_value;
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.double_value >= right_eval.value.double_value;
+                break;
+            case STRING_SYMBOL_TYPE:
+                data.value.bool_value = left_eval.value.str_value >= right_eval.value.str_value;
+                break;
+            }
+        }
+        else
+        {
+            handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+        }
+        break;
+    case DOUBLE_QMARK_OPERATOR:
+        if(left_eval.type != NIL_SYMBOL_TYPE)
+        {
+            data = left_eval;
+        }
+        else if(left_eval.type == NIL_SYMBOL_TYPE)
+        {
+            data = right_eval;
+        }
+        else
+        {
+            handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+        }
+        break;
+    case EXCLAMATION_MARK:
+        if(left_eval.type != NIL_SYMBOL_TYPE)
+        {
+            data = left_eval;
+        } 
+        else
+        {
+            handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+        }
+    default:
+        if (right_eval.type == EMPTY)
+        {
+            return left_eval;
+        }
+        else
+        {
             return right_eval;
+        }
     }
-    // ... (Implement logic for other operators)
-
-    //// Handling the must_be_truth_value flag and return appropriate types
-    // if (must_be_truth_value && data.type != BOOL_SYMBOL_TYPE)
-    //{
-    //// Handle the error that the result is not a truth value when it is expected to be
-    //}
+        
+    if(must_be_truth_value && data.type != BOOL_SYMBOL_TYPE)
+    {
+        handle_error(SEMANTIC_RETURN_ERROR);
+    }
 
     return data;
 }
@@ -242,50 +491,197 @@ generate_code_for_expression(const char *var_to_save, TreeNode *node, Context *c
         return;
     }
 
-    switch (node->type)
-    {
-    case PLUS_OPERATOR:
-        if (context->in_block || context->function_called)
-            if (node->children[0]->type == AST_IDENTIFIER)
-            {
-                dataL = evaluate_expression(node->children[0], context, false);
-                dataR = evaluate_expression(node->children[1], context, false);
-                if (dataL.type == INT_SYMBOL_TYPE)
-                    print_add_int("LF@", var_to_save, "int@", dataL.value.int_value, "int@", dataR.value.int_value);
-
-                //print_add("LF@", var_to_save, "int@", node->children[0]->value, "int@", node->children[1]->value);
-            }
-            else
-            {
-                print_add("GF@", var_to_save, "int@", node->children[0]->value, "int@", node->children[1]->value);
-            }
-        break;
-    case MINUS_OPERATOR:
-        if (context->in_block || context->function_called)
-            print_sub("LF@", var_to_save, "int@", node->children[0]->value, "int@", node->children[1]->value);
-        else
-            ; // TODO
-        break;
-    case MULTIPLICATION_OPERATOR:
-        break;
-    case DIVISION_OPERATOR:
-        break;
-    case INTEGER_LITERAL:
-        print_assignment("GF@", var_to_save, "int@", node->value);
-        break;
-    case DOUBLE_LITERAL:
-        print_assignment("GF@", var_to_save, "double@", node->value);
-        break;
-    case STRING_LITERAL:
-        print_assignment("GF@", var_to_save, "string@", node->value);
-        break;
-    case NIL_LITERAL:
-        break;
-    case IDENTIFIER:
-        break;
-    default:
+    if(node->children_count > 0){
         generate_code_for_expression(var_to_save, node->children[0], context);
         generate_code_for_expression(var_to_save, node->children[1], context);
+    }
+
+    switch(node->type)
+    {
+    case INTEGER_LITERAL:
+        print_pushs("int@", node->value);
+        break;
+    case STRING_LITERAL:
+        print_pushs("string@", node->value);
+        break;
+    case DOUBLE_LITERAL:
+        print_pushs("", convert_double_char_to_hex_str(node->value));
+        break;
+    case NIL_LITERAL:
+        print_pushs("nil@nil", "");
+        break;
+    case IDENTIFIER:
+        if(context->function_called || context->in_block)
+        {
+            print_pushs("LF@", node->value);
+        }
+        else
+        {
+            print_pushs("GF@", node->value);
+        }
+        break;
+    case PLUS_OPERATOR:
+        dataL = evaluate_expression(node->children[0], context, false);
+        dataR = evaluate_expression(node->children[1], context, false);
+        if(dataL.type == STRING_SYMBOL_TYPE)
+        {
+            print_createframe();
+            print_pushframe();
+            print_declaration("LF@", "concat1");
+            print_declaration("LF@", "concat2");
+            print_pops("LF@", "concat2");
+            print_pops("LF@", "concat1");
+            print_concat("LF@concat1", "LF@concat1", "LF@concat2");
+            print_pushs("LF@", "concat1");
+            print_popframe();
+        }
+        else
+        {
+            if(dataL.type == DOUBLE_SYMBOL_TYPE && dataR.type == INT_SYMBOL_TYPE)
+            {
+                printf("INT2FLOATS\n");
+            }
+            else if (dataL.type == INT_SYMBOL_TYPE && dataR.type == DOUBLE_SYMBOL_TYPE)
+            {
+                print_createframe();
+                print_pushframe();
+                print_declaration("LF@", "tempVal");
+                print_pops("LF@", "tempVal");
+                printf("INT2FLOATS\n");
+                print_pushs("LF@", "tempVal");
+                print_popframe();
+            }
+            printf("ADDS\n");
+        }
+        break;
+    case MINUS_OPERATOR:
+        dataL = evaluate_expression(node->children[0], context, false);
+        dataR = evaluate_expression(node->children[1], context, false);
+        if(dataL.type == DOUBLE_SYMBOL_TYPE && dataR.type == INT_SYMBOL_TYPE)
+        {
+            printf("INT2FLOATS\n");
+        }
+        else if (dataL.type == INT_SYMBOL_TYPE && dataR.type == DOUBLE_SYMBOL_TYPE)
+        {
+            print_createframe();
+            print_pushframe();
+            print_declaration("LF@", "tempVal");
+            print_pops("LF@", "tempVal");
+            printf("INT2FLOATS\n");
+            print_pushs("LF@", "tempVal");
+            print_popframe();
+        }
+        printf("SUBS\n");
+        break;
+    case MULTIPLICATION_OPERATOR:
+        dataL = evaluate_expression(node->children[0], context, false);
+        dataR = evaluate_expression(node->children[1], context, false);
+        if(dataL.type == DOUBLE_SYMBOL_TYPE && dataR.type == INT_SYMBOL_TYPE)
+        {
+            printf("INT2FLOATS\n");
+        }
+        else if (dataL.type == INT_SYMBOL_TYPE && dataR.type == DOUBLE_SYMBOL_TYPE)
+        {
+            print_createframe();
+            print_pushframe();
+            print_declaration("LF@", "tempVal");
+            print_pops("LF@", "tempVal");
+            printf("INT2FLOATS\n");
+            print_pushs("LF@", "tempVal");
+            print_popframe();
+        }
+        printf("MULS\n");
+        break;
+    case DIVISION_OPERATOR:
+        dataL = evaluate_expression(node->children[0], context, false);
+        dataR = evaluate_expression(node->children[1], context, false);
+        if(dataL.type == INT_SYMBOL_TYPE && dataR.type == INT_SYMBOL_TYPE)
+        {
+            printf("IDIVS\n");
+        }
+        else
+        {
+            if(dataL.type == DOUBLE_SYMBOL_TYPE && dataR.type == INT_SYMBOL_TYPE)
+            {
+                printf("INT2FLOATS\n");
+            }
+            else if (dataL.type == INT_SYMBOL_TYPE && dataR.type == DOUBLE_SYMBOL_TYPE)
+            {
+                print_createframe();
+                print_pushframe();
+                print_declaration("LF@", "tempVal");
+                print_pops("LF@", "tempVal");
+                printf("INT2FLOATS\n");
+                print_pushs("LF@", "tempVal");
+                print_popframe();
+            }
+            printf("DIVS\n");
+        }
+        break;
+    case LESS_THAN_OPERATOR:
+        printf("LTS\n");
+        break;
+    case GREATER_THAN_OPERATOR:
+        printf("GTS\n");
+        break;
+    case EQUALITY_OPERATOR:
+        printf("EQS\n");
+        break;
+    case LESS_THAN_EQUAL_OPERATOR:
+        printf("GTS\n");
+        printf("NOTS\n");
+        break;
+    case GREATER_THAN_EQUAL_OPERATOR:
+        printf("LTS\n");
+        printf("NOTS\n");
+        break;
+    case DOUBLE_QMARK_OPERATOR:
+
+        dataL = evaluate_expression(node->children[0], context, false);
+        dataR = evaluate_expression(node->children[1], context, false);
+
+        EvaluatedExpressionData data;
+        char *prefix;
+        char *suffix;
+
+        if(dataL.type != NIL_SYMBOL_TYPE){
+            data = dataL;
+        }
+        else
+        {
+            data = dataR;
+        }
+
+        switch(data.type){
+            case INT_SYMBOL_TYPE:
+                prefix = "int@";
+                sprintf(suffix, "%d", data.value.int_value);
+                break;
+            case DOUBLE_SYMBOL_TYPE:
+                prefix = "";
+                suffix = convert_double_num_to_hex_string(data.value.double_value);
+                break;
+            case STRING_SYMBOL_TYPE:
+                prefix = "string@";
+                suffix = data.value.str_value;
+                break;
+            case BOOL_SYMBOL_TYPE:
+                prefix = "bool@";
+                sprintf(suffix, "%s", data.value.bool_value ? "true" : "false");
+                break;
+            default:
+                handle_error(SEMANTIC_TYPE_COMPAT_ERROR);
+                break;
+        }
+        print_createframe();
+        print_pushframe();
+        print_declaration("LF@", "tempVal");
+        print_pops("LF@", "tempVal");
+        print_pops("LF@", "tempVal");
+        print_popframe();
+        print_pushs(prefix, suffix);
+        break;
+    default:
         break;
     }
 }

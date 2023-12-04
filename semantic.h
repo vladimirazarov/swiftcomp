@@ -18,5 +18,7 @@ typedef struct Context {
 } Context;
 
 bool check_type_for_func_args(TreeNode *node, ValueType expectedType, Context *context);
+char *convert_double_char_to_hex_str(const char *valueStr);
+char* convert_double_num_to_hex_string(double value);
 // Function prototypes
 #endif // SEMANTIC_H 
