@@ -69,6 +69,13 @@ typedef struct token {
   char* value;
 } Token;
 
+int hextoint(char k);
+int pwr(int a, int b);
+int countIndentation(char *line);
+void formatstring(char *str, int numspaces, int numLines);
+void checkdelimiter (char *line);
+char* replaceTabsWithSpaces(const char* str);
+
 Token get_token();
 Token make_token(TokenType type, char* value);
 
