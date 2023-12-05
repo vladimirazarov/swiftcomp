@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra -g   CMakeFiles/semantic.dir/home/cigan/ifj23/ifj_compiler/semantic.c.o  -o semantic  libsemantic_lib.a 

@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/test_semantic.dir/test_main.cpp.o CMakeFiles/test_semantic.dir/test_exit.cpp.o  -o test_semantic  libsemantic_lib.a lib/libgtest.a lib/libgtest_main.a lib/libgtest.a -lpthread 
