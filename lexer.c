@@ -1,8 +1,12 @@
-//INPUT: swift code
-//OUTPUT: stream of tokens
-//Function get_token allocates next token in swift code provided as input
-//Author: Martin Packa <xpacka00>
-
+/**
+ * @file lexer.c
+ * @brief Tokenization of IFJ23 Code.
+ *
+ * This module is responsible for converting IFJ23 code into a stream of tokens.
+ * The function `get_token` parses the input IFJ23 code and allocates the next token.
+ *
+ * @author: Martin Packa 
+ */
 
 #include "lexer.h"
 #include <stdio.h>

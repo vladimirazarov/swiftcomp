@@ -1,8 +1,16 @@
+/**
+ * @file codegen.c
+ * @brief Assembly-like Code Generation Functions.
+ *
+ * Implements functions for generating assembly-like instructions for various
+ * operations such as arithmetic, control flow, stack manipulation, and I/O. 
+ * These are used in the code generation phase of a compiler.
+ *
+ * @author Vladimir Azarov
+ */
+
 #include "codegen.h"
-
 #include <stdio.h>
-
-
 
 void print_gf()
 {

@@ -1,29 +1,12 @@
-
-// PROMENNE
-// Vstupni bod = Neoznačená nesouvislá sekvence příkazů, to znamena hlavni telo programu (treba jako v pythonu)
-// Promenne = 1. globalni ... definovane v hlavnim tele programu, rozsah v celem programu
-//            2. lokalni ... rozsah - od pocatku bloku do konce
-//                           2.1. v zanorenych blocich hlavniho tela
-//                           2.2. v uzivatelskych funkcich
-// Rozsah platnosti
-// Blok: Sekvence příkazů v těle funkce, v rámci větve podmíněného příkazu nebo příkazu cyklu.
-// Proměnná je dostupná v bloku a jeho podblokách, pokud není překryta jinou proměnnou se stejným názvem.
-
-// FUNKCE
-// Funkce v IFJ23 nemusí být nutně definovány před jejich použitím, mohou být lexikálně umístěny i za kódem, kde jsou volány.
-// Parametry funkce jsou předávány hodnotou a nelze je měnit.
-// Návratová hodnota funkce je dána příkazem return; v případě chybějící nebo špatného typu návratové hodnoty dochází k chybě.
-// V jazyce IFJ23 není třeba podporovat definice vnořených funkcí.
-
-// CO JE PARSER?
-// program kt generuje PARSE TREE pro dany RETEZEC pokud RETEZEC muze byt generovan definovanou LL-GRAMATIKOU
-
-// VSTUP - potok tokenu
-// VYSTUP - syntakticky strom
-
-//    Declaration: let c: int;
-//    Assignment:  c = 3;
-//    Initialization: let c = 3;
+/**
+ * @file parser.c
+ * @brief Implementation of the parser component.
+ *
+ * This file implements the parser logic, responsible for analyzing
+ * the source code syntax and generating a corresponding Abstract Syntax Tree (AST).
+ * 
+ * @author Vladimir Azarov
+ */
 
 #include "expressions.h"
 #include "parser.h"
@@ -69,7 +52,7 @@ Token look_ahead(int n)
     }
     // Handle error if look-ahead too far
     handle_error(INTERNAL_ERROR);
-    return token_buffer[0]; // Dummy return to make the compiler happy
+    return token_buffer[0]; // Dummy return 
 }
 
 // Function to destroy a parser
@@ -352,7 +335,7 @@ TreeNode *parse_assignment_or_function_call(Parser *parser)
 
         // Add the function call arguments node as the first child
         add_child(assignmentOrFunctionCallNode, functionCallNode->children[0]);
-        free(functionCallNode); // Free the temporary function call nodeparse_function_call(parser, AST_FUNCTION_CALL_IN_ASSIGNMENT);
+        free(functionCallNode); 
     }
     else
     {
@@ -500,7 +483,7 @@ TreeNode *parse_return_statement(Parser *parser) {
     TreeNode *returnNode = make_node(AST_RETURN_STATEMENT, NULL, 1);
     accept_token(parser, RETURN_KEYWORD);
 
-    if (is_return_value) {  // Check this
+    if (is_return_value) {  
         if (is_expression_start_token(look_ahead(0))) {
             TreeNode *expressionOrFuncCallNode = parse_expression_or_func_call(parser, AST_FUNCTION_CALL);
             add_child(returnNode, expressionOrFuncCallNode);

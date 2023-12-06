@@ -1,3 +1,20 @@
+/**
+ * @file expressions.c
+ * @brief Expression Parsing, Evaluation, and Code Generation.
+ *
+ * Implements functions for parsing and evaluating expressions, and generating 
+ * corresponding assembly-like instructions. This file integrates functionalities 
+ * from several modules like lexer, parser, semantic analysis, and code generation.
+ * It handles operator precedence, parses expressions into ASTs, evaluates these
+ * expressions, and generates stack-based VM instructions for them.
+ *
+ * Functions include handling different types of expressions (arithmetic, logical,
+ * literals, etc.), generating code for these expressions, and managing error 
+ * scenarios during parsing and evaluation.
+ *
+ * @author Pavel Klepanec 
+ */
+
 #include "expressions.h"
 #include "error.h"
 #include "parser.h"
@@ -164,8 +181,6 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
     }
     else if (node->type == AST_IDENTIFIER)
     {
-        //if (context->function_called)
-        //{
             Symbol *symbol = find_symbol(context->sym_table_stack, node->value);
             if (symbol == NULL)
             {
@@ -173,7 +188,6 @@ EvaluatedExpressionData evaluate_expression(TreeNode *node, Context *context, bo
             }
             data.type = symbol->type_and_value.type; // Only get the type
             data.value = symbol->type_and_value.value;
-        //}
         return data;
     }
 

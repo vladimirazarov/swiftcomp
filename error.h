@@ -1,3 +1,14 @@
+/**
+ * @file error.h
+ * @brief Header file for error handling functions.
+ *
+ * This header file contains declarations for the error handling functions
+ * used across different stages of the compilation process, including error
+ * logging and management.
+ * 
+ * @author Vladimir Azarov
+ */
+
 #ifndef ERROR_H
 #define ERROR_H
 

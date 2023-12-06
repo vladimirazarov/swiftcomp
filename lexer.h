@@ -1,3 +1,11 @@
+/**
+ * @file lexer.h
+ * @brief Swift Language Lexer.
+ *
+ * Defines token types, lexer states, and functions for Swift code tokenization.
+ * @author: Martin Packa 
+ */
+
 #ifndef LEXER_H 
 #define LEXER_H 
 

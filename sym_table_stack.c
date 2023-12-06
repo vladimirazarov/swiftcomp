@@ -1,3 +1,14 @@
+/**
+ * @file sym_table_stack.c
+ * @brief Implementation of the Symbol Table Stack.
+ *
+ * This file contains the definitions and functions for managing a stack
+ * of symbol tables, used in the semantic analysis phase of a
+ * compiler to handle scopes and symbol resolution.
+ * 
+ * @author Vladimir Azarov
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "symbol_table.h"

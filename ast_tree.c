@@ -1,3 +1,14 @@
+/**
+ * @file ast_tree.c
+ * @brief Implementation of functions for the Abstract Syntax Tree (AST).
+ *
+ * This file contains the definitions of functions and data structures used
+ * for building and managing an Abstract Syntax Tree, which represents the
+ * syntactic structure of source code in a tree-like form.
+ * 
+ * @author Vladimir Azarov
+ */
+
 #include "ast_tree.h"
 #include "lexer.h"
 #include "parser.h"
@@ -33,27 +44,3 @@ void add_child(TreeNode* parent, TreeNode* child) {
     parent->children[parent->children_count] = child;
     parent->children_count++;
 }
-
-//void free_leaf(TreeNode* leaf){
-    //if (leaf == NULL) {
-        //return;
-    //}
-
-    //free_leaf(leaf->left);
-    //free_leaf(leaf->right);
-
-    //free(leaf);
-//}
-
-//void print_tree(TreeNode *root) {
-    //if (root == NULL) {
-        //return;
-    //}
-    //if(root->value != NULL){
-        //fprintf(stdout, "%s ", root->value);
-    //}
-    //print_tree(root->left);
-    //print_tree(root->right);
-//}
-
-

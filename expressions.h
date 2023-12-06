@@ -1,3 +1,12 @@
+/**
+ * @file expressions.h
+ * @brief Function Declarations for Expression Handling.
+ *
+ * Declares functions for parsing, evaluating, and generating code for expressions.
+ * Includes operations like arithmetic, relational, and type compatibility checks.
+ * @author Pavel Klepanec
+ */
+
 #ifndef EXPRESSIONS_H
 #define EXPRESSIONS_H
 

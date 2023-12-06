@@ -1,0 +1,62 @@
+.IFJcode23
+JUMP $$MAIN
+LABEL decrement
+DEFVAR LF@!RETURN
+DEFVAR LF@n
+POPS LF@n
+DEFVAR LF@m
+POPS LF@m
+SUB LF@!RETURN LF@n LF@m
+PUSHS LF@!RETURN
+RETURN
+LABEL $write
+DEFVAR LF@arg_count
+DEFVAR LF@temp_arg
+DEFVAR LF@temp_arg_type
+POPS LF@arg_count
+LABEL $write_loop
+JUMPIFEQ $write_end LF@arg_count int@0
+SUB LF@arg_count LF@arg_count int@1
+POPS LF@temp_arg
+TYPE LF@temp_arg_type LF@temp_arg
+JUMPIFEQ $write_int LF@temp_arg_type string@int
+JUMPIFEQ $write_string LF@temp_arg_type string@string
+JUMPIFEQ $write_float LF@temp_arg_type string@float
+JUMP $write_loop
+LABEL $write_int
+WRITE LF@temp_arg
+JUMP $write_loop
+LABEL $write_string
+WRITE LF@temp_arg
+JUMP $write_loop
+LABEL $write_float
+WRITE LF@temp_arg
+JUMP $write_loop
+LABEL $write_end
+RETURN
+LABEL $$MAIN
+DEFVAR GF@$$LAST_RETURN_VALUE
+DEFVAR GF@var1
+DEFVAR GF@var2
+DEFVAR GF@b
+PUSHS int@1
+PUSHS int@2
+CREATEFRAME
+PUSHFRAME
+CALL decrement
+POPFRAME
+POPS GF@$$LAST_RETURN_VALUE
+MOVE GF@b GF@$$LAST_RETURN_VALUE
+PUSHS int@1
+PUSHS int@2
+CREATEFRAME
+PUSHFRAME
+CALL decrement
+POPFRAME
+POPS GF@$$LAST_RETURN_VALUE
+PUSHS GF@b
+PUSHS int@1
+CREATEFRAME
+PUSHFRAME
+CALL $write
+POPFRAME

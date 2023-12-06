@@ -17,102 +17,6 @@
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-void print_symbol_value(EvaluatedExpressionData data) {
-    switch (data.type) {
-        case STRING_SYMBOL_TYPE:
-            printf("String: %s\n", data.value.str_value);
-            break;
-        case INT_SYMBOL_TYPE:
-            printf("Integer: %d\n", data.value.int_value);
-            break;
-        case DOUBLE_SYMBOL_TYPE:
-            printf("Double: %lf\n", data.value.double_value);
-            break;
-        case BOOL_SYMBOL_TYPE:
-            printf("Boolean: %s\n", data.value.bool_value ? "true" : "false");
-            break;
-        case NIL_SYMBOL_TYPE:
-            printf("Nil\n");
-            break;
-        default:
-            printf("Unknown type\n");
-    }
-}
-
-
-// Helper function to print parameter types as strings
-const char* get_type_name(ValueType type) {
-    switch (type) {
-        case STRING_SYMBOL_TYPE: return "String";
-        case INT_SYMBOL_TYPE: return "Integer";
-        case DOUBLE_SYMBOL_TYPE: return "Double";
-        case BOOL_SYMBOL_TYPE: return "Boolean";
-        case NIL_SYMBOL_TYPE: return "Nil";
-        case FUNCTION_SYMBOL_TYPE: return "Function";
-        default: return "Unknown";
-    }
-}
-
-// Function to print a single parameter
-void print_parameter(const Parameter* param) {
-    printf("Parameter Name: %s, Parameter Identifier: %s, Type: %s, Nullable: %s\n",
-           param->name ? param->name : "NONE",
-           param->identifier,
-           get_type_name(param->type),
-           param->is_nullable ? "true" : "false");
-}
-
-// Function to print the information of a function
-void print_function_info(const FunctionInfo* info) {
-    printf("Function Return Type: %s\n", get_type_name(info->returnType));
-    printf("Function Parameter Count: %d\n", info->parameterCount);
-    Parameter *curParam = info->parameters;
-    while(curParam != NULL)
-    {
-        print_parameter(curParam);
-        curParam = curParam->next;
-    }
-}
-
-// Updated print_symbol function
-void print_symbol(Symbol symbol) {
-    printf("Symbol Name: %s\n", symbol.name);
-    printf("Is Initialized: %s\n", symbol.is_initialized ? "true" : "false");
-    printf("Is Nullable: %s\n", symbol.isNullable ? "true" : "false");
-    printf("Modifier: %s\n", symbol.modifier == CONSTANT ? "Constant" : "Variable");
-    
-    if (symbol.functionInfo != NULL) {
-        // This symbol is a function, print its information
-        print_function_info(symbol.functionInfo);
-    } else {
-        // This symbol is not a function, print its value normally
-        printf("Value: ");
-        print_symbol_value(symbol.type_and_value);
-    }
-    printf("\n");
-}
-
-void print_avl_node(AVLNode* node) {
-    if (node == NULL) {
-        return;
-    }
-
-    print_avl_node(node->left);
-    print_symbol(node->symbol);
-    print_avl_node(node->right);
-}
-
-void print_symbol_table(SymbolTable* table) {
-    if (table == NULL || table->root == NULL) {
-        printf("Symbol table is empty.\n");
-        return;
-    }
-
-    printf("Symbol Table:\n");
-    print_avl_node(table->root);
-    printf("\n");
-}
-
 Symbol create_symbol(char *name, EvaluatedExpressionData data, bool is_initialized, Modifier modifier, FunctionInfo *functionInfo, bool is_nullable) {
     Symbol sym = {0};
     sym.name = strdup(name);
@@ -333,10 +237,9 @@ void update_symbol_value(SymbolTable *table, char *name, SymbolValueU new_value)
     AVLNode *node = search(table->root, name);
     
     if (node) {
-        //TODO: a lot of stuff...
         node->symbol.type_and_value.value = new_value;
     } else {
-        // TODO: err
+        handle_error(SEMANTIC_UNDEF_ERROR);
     }
 }
 

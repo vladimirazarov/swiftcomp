@@ -1,3 +1,14 @@
+/**
+ * @file error.c
+ * @brief Implementation of error handling functions.
+ *
+ * This file includes the definitions and implementations of functions used
+ * for error reporting and handling throughout the compilation process. It
+ * provides mechanisms for logging and managing various types of errors.
+ * 
+ * @author Vladimir Azarov
+ */
+
 #include "error.h"
 #include <stdio.h>
 

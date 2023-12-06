@@ -1,3 +1,14 @@
+ /**
+ * @file codegen.h
+ * @brief Header file for code generation functions.
+ *
+ * This header file declares the functions and structures needed for the
+ * code generation phase in the compiler, which translates the AST into
+ * target code. 
+ * 
+ * @author Vladimir Azarov
+ */
+
 #ifndef CODEGEN_H
 #define CODEGEN_H
 
@@ -200,7 +211,6 @@
     "\nPOPFRAME"                                                              \
     "\nRETURN"
 
-
 void print_gf();
 void print_lf();
 void print_tf();
@@ -208,106 +218,43 @@ void print_int();
 void print_float();
 void print_string();
 void print_nil();
-
 void print_assignment(const char *destination_prefix,const char *destination_suffix, const char *prefix, const char *suffix);
-
-// Function to print variable declaration instructions
 void print_declaration(const char *frame, const char *name);
-
 void print_jump_to_function_end(const char* prefix, const char* function_name);
 void print_label_function_end(const char* frame, const char* function_name);
-
-
 void print_add_int(const char* destination_prefix, const char* destination_suffix, const char* op1_prefix, int op1_suffix, const char* op2_prefix, int op2_suffix);
-
-// Function to print label creation instructions
 void print_label(const char *frame, const char *name);
-
 void print_pushs_size_t(const char* prefix, const int suffix);
 void print_call(const char *prefix, const char *suffix);
-// Function to print an unconditional jump instruction
 void print_jump(const char *prefix, const char *suffix);
-// Function to print a conditional jump instruction based on equality
 void print_jumpifeq(const char *label, const char *op1, const char *op2);
-
-// Function to print a conditional jump instruction based on inequality
 void print_jumpifneq(const char *label, const char *op1, const char *op2);
 void print_return();
-
-// Function to print the addition of two numbers
 void print_add(const char* destination_prefix, const char* destination_suffix, const char* op1_prefix, const char* op1_suffix, const char* op2_prefix, const char* op2_suffix);
-
-// Function to print the subtraction of two numbers
 void print_sub(const char* destination_prefix, const char* destination_suffix, const char* op1_prefix, const char* op1_suffix, const char* op2_prefix, const char* op2_suffix);
-
 void print_div(const char* destination_prefix, const char* destination_suffix, const char* op1_prefix, const char* op1_suffix, const char* op2_prefix, const char* op2_suffix);
-
-// Function to print the multiplication of two numbers
 void print_mul(const char* destination_prefix, const char* destination_suffix, const char* op1_prefix, const char* op1_suffix, const char* op2_prefix, const char* op2_suffix);
-
-// Function to create a new temporary frame
 void print_createframe();
-
-// Function to push a temporary frame onto the frame stack
 void print_pushframe();
-
-// Function to pop the current frame from the frame stack
 void print_popframe();
-
-// Function to push a value onto the data stack
 void print_pushs(const char *prefix, const char *sufix);
-
-// Function to pop a value from the data stack
 void print_pops(const char *prefix, const char *sufix);
-
-
-// Function to clear the data stack
 void print_clears();
-
-// Function to perform an integer division
 void print_idiv(const char *destination, const char *op1, const char *op2);
-
-// Function to compare if one value is less than another
 void print_lt(const char *destination, const char *op1, const char *op2);
-// Function to compare if one value is greater than another
 void print_gt(const char *destination, const char *op1, const char *op2);
-
-// Function to compare if two values are equal
 void print_eq(const char *destination, const char *op1, const char *op2);
-
-// Function to perform a logical AND operation
 void print_and(const char *destination, const char *op1, const char *op2);
-
-// Function to perform a logical OR operation
 void print_or(const char *destination, const char *op1, const char *op2);
-
-// Function to perform a logical NOT operation
 void print_not(const char *destination, const char *operand);
-
-// Function to convert an integer to a float
 void print_int2float(const char *destination, const char *operand);
-// Function to convert a float to an integer
 void print_float2int(const char *destination, const char *operand);
-
-// Function to convert an integer to a character
 void print_int2char(const char *destination, const char *operand);
-
-// Function to get the ordinal value of a character in a string
 void print_stri2int(const char *destination, const char *string, const char *index);
-
-// Function to read a value from standard input
 void print_read(const char *variable, const char *type);
-
-// Function to write a value to standard output
 void print_write(const char *symbol);
-// Function to concatenate two strings
 void print_concat(const char *destination, const char *string1, const char *string2);
-// Function to get the length of a string
 void print_strlen(const char *destination, const char *string);
-
-// Function to get a character from a string
 void print_getchar(const char *destination, const char *string, const char *index);
-// Function to set a character in a string
 void print_setchar(const char *destination, const char *index, const char *character);
-
 #endif // CODEGEN_H

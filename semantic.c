@@ -1,3 +1,14 @@
+/**
+ * @file semantic.c
+ * @brief Implementation of semantic analysis functions.
+ *
+ * This file contains the implementation of functions responsible for
+ * performing semantic analysis on the Abstract Syntax Tree (AST). It ensures
+ * that the source code adheres to the semantic rules of the IFJ23 programming language.
+ * 
+ * @author Vladimir Azarov
+ */
+
 #include "semantic.h"
 #include "ast_tree.h"
 #include "lexer.h"
@@ -8,162 +19,6 @@
 #include "expressions.h"
 #include "codegen.h"
 
-const char *get_node_type_name(int type)
-{
-    switch (type)
-    {
-    case AST_IDENTIFIER:
-        return "AST_IDENTIFIER";
-    case AST_LEFT_PARENTHESIS:
-        return "AST_LEFT_PARENTHESIS";
-    case AST_RIGHT_PARENTHESIS:
-        return "AST_RIGHT_PARENTHESIS";
-    case AST_LEFT_CURLY_BRACE:
-        return "AST_LEFT_CURLY_BRACE";
-    case AST_RIGHT_CURLY_BRACE:
-        return "AST_RIGHT_CURLY_BRACE";
-    case AST_PLUS_OPERATOR:
-        return "AST_PLUS_OPERATOR";
-    case AST_MINUS_OPERATOR:
-        return "AST_MINUS_OPERATOR";
-    case AST_MULTIPLICATION_OPERATOR:
-        return "AST_MULTIPLICATION_OPERATOR";
-    case AST_DIVISION_OPERATOR:
-        return "AST_DIVISION_OPERATOR";
-    case AST_LESS_THAN_OPERATOR:
-        return "AST_LESS_THAN_OPERATOR";
-    case AST_GREATER_THAN_OPERATOR:
-        return "AST_GREATER_THAN_OPERATOR";
-    case AST_LESS_THAN_EQUAL_OPERATOR:
-        return "AST_LESS_THAN_EQUAL_OPERATOR";
-    case AST_GREATER_THAN_EQUAL_OPERATOR:
-        return "AST_GREATER_THAN_EQUAL_OPERATOR";
-    case AST_SEMICOLON:
-        return "AST_SEMICOLON";
-    case AST_ASSIGNMENT_OPERATOR:
-        return "AST_ASSIGNMENT_OPERATOR";
-    case AST_EQUALITY_OPERATOR:
-        return "AST_EQUALITY_OPERATOR";
-    case AST_NOT_EQUAL_OPERATOR:
-        return "AST_NOT_EQUAL_OPERATOR";
-    case AST_COMMA:
-        return "AST_COMMA";
-    case AST_INTEGER_LITERAL:
-        return "AST_INTEGER_LITERAL";
-    case AST_STRING_LITERAL:
-        return "AST_STRING_LITERAL";
-    case AST_MULTILINE_STRING:
-        return "AST_MULTILINE_STRING";
-    case AST_DOUBLE_LITERAL:
-        return "AST_DOUBLE_LITERAL";
-    case AST_NIL_LITERAL:
-        return "AST_NIL_LITERAL";
-    case AST_COLON:
-        return "AST_COLON";
-    case AST_RETURN_KEYWORD:
-        return "AST_RETURN_KEYWORD";
-    case AST_ELSE_KEYWORD:
-        return "AST_ELSE_KEYWORD";
-    case AST_FUNCTION_KEYWORD:
-        return "AST_FUNCTION_KEYWORD";
-    case AST_IF_KEYWORD:
-        return "AST_IF_KEYWORD";
-    case AST_WHILE_KEYWORD:
-        return "AST_WHILE_KEYWORD";
-    case AST_VAR_KEYWORD:
-        return "AST_VAR_KEYWORD";
-    case AST_LET_KEYWORD:
-        return "AST_LET_KEYWORD";
-    case AST_ARROW:
-        return "AST_ARROW";
-    case AST_END_OF_FILE:
-        return "AST_END_OF_FILE";
-    case AST_STRING_KEYWORD:
-        return "AST_STRING_KEYWORD";
-    case AST_STRING_NULLABLE_KEYWORD:
-        return "AST_STRING_NULLABLE_KEYWORD";
-    case AST_INT_KEYWORD:
-        return "AST_INT_KEYWORD";
-    case AST_INT_NULLABLE_KEYWORD:
-        return "AST_INT_NULLABLE_KEYWORD";
-    case AST_DOUBLE_KEYWORD:
-        return "AST_DOUBLE_KEYWORD";
-    case AST_DOUBLE_NULLABLE_KEYWORD:
-        return "AST_DOUBLE_NULLABLE_KEYWORD";
-    case AST_UNDERSCORE:
-        return "AST_UNDERSCORE";
-    case AST_PROGRAM:
-        return "AST_PROGRAM";
-    case AST_SECTION:
-        return "AST_SECTION";
-    case AST_STATEMENTS:
-        return "AST_STATEMENTS";
-    case AST_STATEMENT:
-        return "AST_STATEMENT";
-    case AST_DECLARATION:
-        return "AST_DECLARATION";
-    case AST_DECLARATION_INITIALIZATION:
-        return "AST_DECLARATION_INITIALIZATION";
-    case AST_OPTIONAL_TYPE:
-        return "AST_OPTIONAL_TYPE";
-    case AST_ASSIGNMENT:
-        return "AST_ASSIGNMENT";
-    case AST_CONDITIONAL:
-        return "AST_CONDITIONAL";
-    case AST_LOOP:
-        return "AST_LOOP";
-    case AST_FUNCTION_CALL:
-        return "AST_FUNCTION_CALL";
-    case AST_RETURN_STATEMENT:
-        return "AST_RETURN_STATEMENT";
-    case AST_FUNCTION_DEFINITIONS:
-        return "AST_FUNCTION_DEFINITIONS";
-    case AST_FUNCTION_DEFINITION:
-        return "AST_FUNCTION_DEFINITION";
-    case AST_OPTIONAL_RETURN_TYPE:
-        return "AST_OPTIONAL_RETURN_TYPE";
-    case AST_PARAMETERS:
-        return "AST_PARAMETERS";
-    case AST_PARAMETER:
-        return "AST_PARAMETER";
-    case AST_NAME:
-        return "AST_NAME";
-    case AST_MORE_PARAMETERS:
-        return "AST_MORE_PARAMETERS";
-    case AST_OPTIONAL_VAR_DECLARATION:
-        return "AST_OPTIONAL_VAR_DECLARATION";
-    case AST_ARGUMENTS:
-        return "AST_ARGUMENTS";
-    case AST_ARGUMENT:
-        return "AST_ARGUMENT";
-    case AST_MORE_ARGUMENTS:
-        return "AST_MORE_ARGUMENTS";
-    case AST_EXPRESSION_OR_ID:
-        return "AST_EXPRESSION_OR_ID";
-    case AST_ELSE_PART:
-        return "AST_ELSE_PART";
-    case AST_BLOCK:
-        return "AST_BLOCK";
-    case AST_PARAMETER_NAME:
-        return "AST_PARAMETER_NAME";
-    case AST_EXTERNAL_NAME:
-        return "AST_EXTERNAL_NAME";
-    case AST_INTERNAL_NAME:
-        return "AST_INTERNAL_NAME";
-    case AST_INITIALIZATION:
-        return "AST_INITIALIZATION";
-    case AST_EXPRESSION:
-        return "AST_EXPRESSION";
-    case AST_FUNCTION_CALL_IN_ASSIGNMENT:
-        return "AST_FUNCTION_CALL_IN_ASSIGNMENT";
-    case EXCLAMATION_MARK:
-        return "EXCLAMATION MARK";
-    case AST_MORE_SECTIONS:
-        return "MORE SECTIONS";
-    default:
-        return "UNKNOWN";
-    }
-}
 
 const char *tokenTypeToString(TokenType type)
 {
@@ -180,36 +35,6 @@ const char *tokenTypeToString(TokenType type)
         return "nil";
     default:
         return "unknown";
-    }
-}
-
-// Function to print the AST in a readable format
-void print_ast(TreeNode *root, int indent_level)
-{
-    if (root == NULL)
-        return;
-
-    // Indentation for readability
-    for (int i = 0; i < indent_level; ++i)
-    {
-        printf("  ");
-    }
-
-    // Print the current node's type name
-    const char *node_type_name = get_node_type_name(root->type);
-    printf("%s", node_type_name);
-
-    // Print the node value if it exists
-    if (root->value != NULL)
-    {
-        printf(" (Value: %s)", root->value);
-    }
-    printf("\n");
-
-    // Recursive DFS traversal for each child
-    for (size_t i = 0; i < root->children_count; ++i)
-    {
-        print_ast(root->children[i], indent_level + 1);
     }
 }
 
@@ -254,6 +79,7 @@ ValueType convert_ast_type_to_symbol_type(ASTNodeType ast_node_type)
         break;
     }
 }
+
 bool check_is_nullable_by_type(ASTNodeType ast_node_type)
 {
     switch (ast_node_type)
@@ -271,35 +97,6 @@ bool check_is_nullable_by_type(ASTNodeType ast_node_type)
         return false;
         break;
     }
-}
-
-bool check_type_for_func_args(TreeNode *node, ValueType expectedType, Context *context)
-{
-    // This is a placeholder function. You should fill in the implementation based on your AST node structure and symbol table.
-    // The following is a pseudo-code outline:
-
-    // If the node is an identifier, look it up in the symbol table to get its type
-    if (node->type == AST_IDENTIFIER)
-    {
-        Symbol *symbol = find_symbol(context->sym_table_stack->top, node->value);
-        return symbol && symbol->type_and_value.type == expectedType;
-    }
-    // If the node is a literal, compare its type directly
-    else if (node->type == AST_INTEGER_LITERAL && expectedType == INT_SYMBOL_TYPE)
-    {
-        return true;
-    }
-    else if (node->type == AST_DOUBLE_LITERAL && expectedType == DOUBLE_SYMBOL_TYPE)
-    {
-        return true;
-    }
-    else if (node->type == AST_STRING_LITERAL && expectedType == STRING_SYMBOL_TYPE)
-    {
-        return true;
-    }
-    // Add more cases as needed for other types of literals or expressions
-
-    return false; // Return false if none of the types match
 }
 
 char *replaceSpecialChars(const char *input)
@@ -381,7 +178,6 @@ char* convert_double_num_to_hex_string(double value) {
 
 void process_write(TreeNode *arguments_ast_node, Context *context)
 {
-    // TODO: external name cant exist
     for (int i = arguments_ast_node->children_count - 1; i >= 0; i--)
     {
         TreeNode *current_arg = arguments_ast_node->children[i];
@@ -444,7 +240,6 @@ void semantic_analysis(TreeNode *root, Context *context)
         if (find_in_current_table(context->sym_table_stack->top, id->value) != NULL)
             handle_error(SEMANTIC_UNDEF_ERROR);
 
-        // TODO: nedeklarovat podruhe pri praci s funckemi
         if (context->in_block || context->function_called)
             print_declaration("LF@", id->value);
         else
@@ -532,7 +327,6 @@ void semantic_analysis(TreeNode *root, Context *context)
         if (find_in_current_table(context->sym_table_stack->top, id->value) != NULL)
             handle_error(SEMANTIC_UNDEF_ERROR);
 
-        // TODO: nedeklarovat podruhe pri praci s funckemi
         if (context->in_block || context->function_called)
             print_declaration("LF@", id->value);
         else
@@ -655,9 +449,6 @@ void semantic_analysis(TreeNode *root, Context *context)
         ValueType argument_type;
         Symbol *id_symbol = NULL;
 
-        // if function name is in built in functions
-        // zpracuj_built_in_funkci()
-        // break;
 
         // 2. Evaluate arguments and check types, create new scope and insert new symbols
         SymbolTable *function_scope_table = init_symbol_table();
@@ -767,7 +558,6 @@ void semantic_analysis(TreeNode *root, Context *context)
             }
             else if (argument_type == AST_IDENTIFIER)
             {
-                //TODO : SCOPE RESOLUTION
                 print_pushs("LF@", argument_value_node->value);
             }
         }
@@ -805,7 +595,6 @@ void semantic_analysis(TreeNode *root, Context *context)
 
     case AST_BLOCK:
     {
-        //TODO: there might be semantic mistake 
         if (!(context->function_is_being_declared) ||  !(context->function_called))
         {
             // Create a new scope for the block
@@ -822,7 +611,6 @@ void semantic_analysis(TreeNode *root, Context *context)
             {
                 context->in_block = true;
                 semantic_analysis(root->children[i], context);
-                // TODO: CONFIDENT?
                 root->children[i] = NULL;
                 context->in_block = false;
             }
@@ -854,7 +642,6 @@ void semantic_analysis(TreeNode *root, Context *context)
                     print_pops("GF@", "!RETURN");
 
             context->last_return_value = evaluate_expression(root->children[1], context, false);
-            // Compare against the function's return type
             // if (return_expr.type != context->current_function->functionInfo->returnType)
             //{
             // handle_error(SEMANTIC_PARAM_TYPE_ERROR);
@@ -904,7 +691,6 @@ break;
     for (size_t i = 0; i < root->children_count; ++i)
     {
         semantic_analysis(root->children[i], context);
-        // TODO:  CONFIDENT?
         root->children[i] = NULL;
     }
 }
@@ -971,15 +757,6 @@ void add_functions_to_symtable(TreeNode *root, Context *context)
                 }
                 else
                     new_parameter->name = strdup(external_name); // Duplicate the name
-                //TODO: external and internal names can be the same?
-                //else if (external_name_type == AST_EXTERNAL_NAME)
-                //{
-                    //if (strcmp(external_name, internal_name) == 0)
-                    //{
-                        //free(new_parameter);
-                        //handle_error(SEMANTIC_OTHER_ERROR);
-                    //}
-                //}
 
                 // Duplicate the identifier
                 new_parameter->identifier = strdup(internal_name);
@@ -1014,7 +791,6 @@ void add_functions_to_symtable(TreeNode *root, Context *context)
                 function_symbol->functionInfo->returnType = convert_ast_type_to_symbol_type(return_type_node->type);
                 function_symbol->isNullable = check_is_nullable_by_type(return_type_node->type);
                 body_node = root->children[2];
-                // TODO: IF ITS RIGHT? REMOVE BLOCK OF FUNCTION SO IT WONT BE ANALYZED 2X
                 root->children[2] = NULL;
             }
 
@@ -1041,7 +817,6 @@ void add_functions_to_symtable(TreeNode *root, Context *context)
     }
 }
 
-// TODO: ADD OTHERS
 void add_built_in_functions(Context *context)
 {
     // printf("%s", FUNCTION_READSTRING);
@@ -1066,7 +841,6 @@ int main()
     TreeNode *program = parse_program(parser);
     free_parser(parser);
 
-    //print_ast(program, 0);
     SymbolTable *table;
     table = init_symbol_table();
     Stack *sym_table_stack;
@@ -1082,19 +856,14 @@ int main()
     context->function_is_being_declared = false;
     context->in_block = false;
     
-
     printf(".IFJcode23\n");
     print_jump("", "$$MAIN");
     add_functions_to_symtable(program, context);
-    //print_ast(program, 0);
-    //putchar('\n');
-    //print_ast(program, 0);
     add_built_in_functions(context);
     print_label("", "$$MAIN");
     print_declaration("GF@", LAST_RETURN_VALUE);
 
     semantic_analysis(program, context);
-    //print_symbol_table(context->sym_table_stack->top->table);
 
     return 0;
 }

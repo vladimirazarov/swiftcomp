@@ -1,12 +1,22 @@
+/**
+ * @file parser.h
+ * @brief Header file for the parser component.
+ *
+ * This header file declares the functions and necessary data structures for
+ * the parser component, which performs syntactic analysis of source code.
+ * 
+ * @author Vladimir Azarov
+ */
+
 #ifndef PARSER_H
 #define PARSER_H
 
 #include "lexer.h"
 #include "symbol_table.h"
 #include "ast_tree.h"
-#include "error.h"  // Assuming you have an error.h for error handling
+#include "error.h"  
 #include <stdbool.h>
-#include <stdio.h>  // For printf, remove if not needed
+#include <stdio.h>  
 
 // Structure to represent the parser
 typedef struct {

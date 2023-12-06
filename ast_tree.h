@@ -1,3 +1,14 @@
+/**
+ * @file ast_tree.h
+ * @brief Header file for Abstract Syntax Tree (AST) functions.
+ *
+ * This header file contains the declarations of the functions and data
+ * structures used for the Abstract Syntax Tree (AST) utilized in parsing
+ * and representing source code.
+ * 
+ * @author Vladimir Azarov
+ */
+
 #ifndef AST_TREE_H
 #define AST_TREE_H
 #include "lexer.h"
@@ -82,7 +93,7 @@ typedef enum {
 
 // Structure to represent AST
 typedef struct TreeNode {
-    ASTNodeType type; // For ast
+    ASTNodeType type;
     char *value;
     struct TreeNode **children; // Array for children nodes
     size_t children_count; // Number of children in the array
@@ -91,5 +102,4 @@ typedef struct TreeNode {
 // Function prototypes
 TreeNode* make_node(ASTNodeType type, char* value, int initial_child_capacity);
 void print_ast(TreeNode *root, int indent_level);
-//void free_leaf(TreeNode* leaf);
 #endif
