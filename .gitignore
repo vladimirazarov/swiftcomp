@@ -1,8 +1,15 @@
 .vscode/
-lexer.o
-parser.o
-parser.exe
-symbol_table.o
-ast_tree.o
-expressions.o
-error.o
+*.o
+semantic
+atomsync
+
+# Temporary files
+*~
+*.tmp
+
+# Build directories (if any)
+# build/
+
+# Test artifacts
+# test/*.out
+# test/output/

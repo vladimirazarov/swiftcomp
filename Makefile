@@ -2,17 +2,22 @@
 CC = gcc
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -g
+CFLAGS = -Wall -Wextra -std=c11 -g
+
+# Libraries
+LIBS = -lrt -lpthread
 
 # Object files
 OBJ = parser.o lexer.o symbol_table.o expressions.o ast_tree.o error.o semantic.o sym_table_stack.o codegen.o
 
 # Target executable
-TARGET = semantic 
+TARGET = atomsync 
 
 # Build target executable
+all: $(TARGET)
+
 $(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ) $(LIBS)
 
 # Compile source files into object files
 semantic.o: semantic.c semantic.h
