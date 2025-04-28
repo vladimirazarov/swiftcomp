@@ -1,4 +1,4 @@
-# atomsync
+# swiftcomp
 
 A compiler for the IFJ23 language, built as a university project.
 
@@ -10,14 +10,14 @@ To build the compiler, simply run:
 make
 ```
 
-This will create the executable named `semantic` in the project root.
+This will create the executable named `swiftcomp` in the project root.
 
 ## Usage
 
 The compiler takes the source code file as input from standard input.
 
 ```bash
-./semantic < your_source_file.ifj
+./swiftcomp < your_source_file.ifj
 ```
 
 (Note: Adjust the executable name if changed in the Makefile)
@@ -37,5 +37,5 @@ func main() {
 You can compile and run it (assuming you have an IFJ23 interpreter like `ic23int`) like this:
 
 ```bash
-./semantic < example.ifj | ic23int
+./swiftcomp < example.ifj | ic23int
 ```

@@ -1,7 +1,7 @@
 .vscode/
 src/*.o
 semantic
-atomsync
+swiftcomp
 
 *~
 *.tmp
