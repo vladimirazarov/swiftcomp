@@ -1,15 +1,9 @@
 .vscode/
-*.o
+src/*.o
 semantic
 atomsync
 
-# Temporary files
 *~
 *.tmp
 
-# Build directories (if any)
-# build/
 
-# Test artifacts
-# test/*.out
-# test/output/
